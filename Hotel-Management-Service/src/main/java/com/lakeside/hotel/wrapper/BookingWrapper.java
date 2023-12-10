@@ -1,68 +1,35 @@
-package com.lakeside.hotel.model;
+package com.lakeside.hotel.wrapper;
 
 import java.time.LocalDate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import com.lakeside.hotel.model.HotelRoom;
 
-@Entity
-@Table(name = "Booked_Rooms")
-public class BookedRoom {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
+public class BookingWrapper {
 	private Long bookingId;
-
-	@Column(name = "checkIn")
 	private LocalDate checkInDate;
-
-	@Column(name = "checkOut")
 	private LocalDate checkOutDate;
-
-	@Column(name = "guest_name")
 	private String guestName;
-
-	@Column(name = "guest_email")
 	private String guestEmail;
-
-	@Column(name = "adults")
 	private int noOfAdults;
-
-	@Column(name = "children")
 	private int noOfChildren;
-
-	@Column(name = "total_guest")
 	private int totalGuests;
-
-	@Column(name = "confirmation_code")
 	private String bookingConfirmationCode;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "room_id_fk")
 	private HotelRoom room;
 
-	public BookedRoom() {
+	public BookingWrapper() {
 		super();
 	}
 
-	public BookedRoom(LocalDate checkInDate, LocalDate checkOutDate, String guestName, String guestEmail,
-			int noOfAdults, int noOfChildren, int totalGuests, String bookingConfirmationCode, HotelRoom room) {
+	public BookingWrapper(Long bookingId, LocalDate checkInDate, LocalDate checkOutDate,
+			String bookingConfirmationCode) {
 		super();
+		this.bookingId = bookingId;
 		this.checkInDate = checkInDate;
 		this.checkOutDate = checkOutDate;
-		this.guestName = guestName;
-		this.guestEmail = guestEmail;
-		this.noOfAdults = noOfAdults;
-		this.noOfChildren = noOfChildren;
-		this.totalGuests = totalGuests;
 		this.bookingConfirmationCode = bookingConfirmationCode;
-		this.room = room;
 	}
 
 	public Long getBookingId() {
@@ -111,7 +78,6 @@ public class BookedRoom {
 
 	public void setNoOfAdults(int noOfAdults) {
 		this.noOfAdults = noOfAdults;
-		calcNoOfGuests();
 	}
 
 	public int getNoOfChildren() {
@@ -120,15 +86,10 @@ public class BookedRoom {
 
 	public void setNoOfChildren(int noOfChildren) {
 		this.noOfChildren = noOfChildren;
-		calcNoOfGuests();
 	}
 
 	public int getTotalGuests() {
 		return totalGuests;
-	}
-
-	public void calcNoOfGuests() {
-		this.totalGuests = this.noOfAdults + this.noOfChildren;
 	}
 
 	public void setTotalGuests(int totalGuests) {
@@ -149,14 +110,6 @@ public class BookedRoom {
 
 	public void setRoom(HotelRoom room) {
 		this.room = room;
-	}
-
-	@Override
-	public String toString() {
-		return "BookedRoom [bookingId=" + bookingId + ", checkInDate=" + checkInDate + ", checkOutDate=" + checkOutDate
-				+ ", guestName=" + guestName + ", guestEmail=" + guestEmail + ", noOfAdults=" + noOfAdults
-				+ ", noOfChildren=" + noOfChildren + ", totalGuests=" + totalGuests + ", bookingConfirmationCode="
-				+ bookingConfirmationCode + ", room=" + room + "]";
 	}
 
 }
