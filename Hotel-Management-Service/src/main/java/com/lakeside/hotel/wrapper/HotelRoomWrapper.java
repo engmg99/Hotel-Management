@@ -3,7 +3,7 @@ package com.lakeside.hotel.wrapper;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.apache.tomcat.util.codec.binary.Base64;
+import com.lakeside.hotel.utils.ImageUtility;
 
 public class HotelRoomWrapper {
 	private Long id;
@@ -26,7 +26,7 @@ public class HotelRoomWrapper {
 		this.roomType = roomType;
 		this.price = price;
 		this.isBooked = isBooked;
-		this.roomPhoto = roomPhotoBytes != null ? Base64.encodeBase64String(roomPhotoBytes) : null;
+		this.roomPhoto = ImageUtility.base64Photo(roomPhotoBytes);
 //		this.bookings = bookings;
 	}
 

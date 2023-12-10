@@ -1,14 +1,9 @@
 package com.lakeside.hotel.controller;
 
 import java.math.BigDecimal;
-import java.sql.Blob;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.sql.rowset.serial.SerialBlob;
-
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.lakeside.hotel.model.HotelRoom;
 import com.lakeside.hotel.service.BookedRoomService;
-import com.lakeside.hotel.service.impl.HotelRoomServiceImpl;
+import com.lakeside.hotel.service.IRoomService;
+import com.lakeside.hotel.utils.ImageUtility;
 import com.lakeside.hotel.wrapper.HotelRoomWrapper;
 
 @RestController
@@ -35,7 +31,7 @@ import com.lakeside.hotel.wrapper.HotelRoomWrapper;
 public class HotelRoomController {
 
 	@Autowired
-	private HotelRoomServiceImpl roomService;
+	private IRoomService roomService;
 
 	@Autowired
 	private BookedRoomService roomBookingService;
@@ -63,15 +59,10 @@ public class HotelRoomController {
 		List<HotelRoomWrapper> response = new ArrayList<>();
 		try {
 			List<HotelRoom> roomsList = roomService.getAllAvailableRooms();
-			System.out.println("RoomList: " + roomsList);
 			for (HotelRoom roomObj : roomsList) {
-				byte[] photoBytes = roomService.getRoomPhotoByRoomId(roomObj.getId());
-				System.out.println("photoBytes: " + photoBytes);
 				HotelRoomWrapper roomResponse = getHotelRoomWrapper(roomObj);
-				if (photoBytes != null && photoBytes.length > 0) {
-					String base64Photo = Base64.encodeBase64String(photoBytes);
-					roomResponse.setRoomPhoto(base64Photo);
-				}
+				byte[] photoBytes = roomService.getRoomPhotoByRoomId(roomObj.getId());
+				roomResponse.setRoomPhoto(ImageUtility.base64Photo(photoBytes));
 				response.add(roomResponse);
 			}
 			return ResponseEntity.ok(response);
@@ -90,22 +81,20 @@ public class HotelRoomController {
 	@PutMapping("edit/room/{roomId}")
 	public ResponseEntity<HotelRoomWrapper> updateRoom(@PathVariable Long roomId,
 			@RequestParam(required = false) String roomType, @RequestParam(required = false) String roomPrice,
-			@RequestParam(required = false) MultipartFile photo) {
+			@RequestParam(required = false) MultipartFile photo, BindingResult results) {
 		byte[] photoBytes = null;
 		try {
-//			if (results.hasErrors()) {
-//				System.out.println("error");
-//			}
-			if (photo != null && !photo.isEmpty()) {
-				photoBytes = photo.getBytes();
+			if (results.hasErrors()) {
+				System.out.println("error");
 			}
-			Blob photoBlob = photoBytes != null && photoBytes.length > 0 ? new SerialBlob(photoBytes) : null;
-
 			HotelRoom newRoomObject = new HotelRoom();
 			newRoomObject.setId(roomId);
 			newRoomObject.setPrice(roomPrice != null ? BigDecimal.valueOf(Long.parseLong(roomPrice)) : null);
 			newRoomObject.setRoomType(roomType != null ? roomType : null);
-			newRoomObject.setRoomPhoto(photoBlob);
+			if (photo != null && !photo.isEmpty()) {
+				photoBytes = photo.getBytes();
+			}
+			newRoomObject.setRoomPhoto(ImageUtility.convertBytesToBlob(photoBytes));
 
 			HotelRoom updatedRoom = roomService.updateRoom(newRoomObject);
 			HotelRoomWrapper roomWrapper = getHotelRoomWrapper(updatedRoom);
@@ -136,7 +125,7 @@ public class HotelRoomController {
 //							booking.getCheckOutDate(), booking.getBookingConfirmationCode()))
 //					.toList();
 			return new HotelRoomWrapper(roomObj.getId(), roomObj.getRoomType(), roomObj.getPrice(), roomObj.isBooked(),
-					roomService.convertBlobToBytes(roomObj));
+					ImageUtility.convertBlobToBytes(roomObj));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -1,30 +1,26 @@
 package com.lakeside.hotel.service.impl;
 
 import java.math.BigDecimal;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import javax.sql.rowset.serial.SerialBlob;
-
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.lakeside.hotel.exception.PhotoRetrievalException;
 import com.lakeside.hotel.exception.ResourceNotFoundException;
 import com.lakeside.hotel.model.HotelRoom;
 import com.lakeside.hotel.repository.HotelRoomRepo;
 import com.lakeside.hotel.service.IRoomService;
+import com.lakeside.hotel.utils.ImageUtility;
 
 @Service
 public class HotelRoomServiceImpl implements IRoomService {
 
 	private static final Logger log = LoggerFactory.getLogger(HotelRoomServiceImpl.class);
+
 	@Autowired
 	private HotelRoomRepo roomRepo;
 
@@ -35,9 +31,7 @@ public class HotelRoomServiceImpl implements IRoomService {
 			room.setRoomType(roomype);
 			room.setPrice(roomPrice);
 			if (!file.isEmpty()) {
-				byte[] photoBytes = file.getBytes();
-				Blob photoBlob = new SerialBlob(photoBytes);
-				room.setRoomPhoto(photoBlob);
+				room.setRoomPhoto(ImageUtility.convertBytesToBlob(file.getBytes()));
 			} else {
 				room.setRoomPhoto(null);
 			}
@@ -65,10 +59,7 @@ public class HotelRoomServiceImpl implements IRoomService {
 			if (room.isEmpty()) {
 				throw new ResourceNotFoundException("Hotel Room Not Found!");
 			}
-			Blob photoBlob = room.get().getRoomPhoto();
-			if (photoBlob != null) {
-				return photoBlob.getBytes(1, (int) photoBlob.length());
-			}
+			return ImageUtility.convertBlobToBytes(room.get());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -90,21 +81,6 @@ public class HotelRoomServiceImpl implements IRoomService {
 			return room.get();
 		}
 		return null;
-	}
-
-	public byte[] convertBlobToBytes(HotelRoom roomObj) {
-		byte[] photoByte = null;
-		try {
-			Blob photoBlob = roomObj.getRoomPhoto();
-			if (photoBlob != null) {
-				photoByte = photoBlob.getBytes(1, (int) photoBlob.length());
-			}
-		} catch (SQLException e) {
-			throw new PhotoRetrievalException("Error fetching room photo");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return photoByte;
 	}
 
 	public HotelRoom updateRoom(HotelRoom updatedRoomObj) {
@@ -155,11 +131,11 @@ public class HotelRoomServiceImpl implements IRoomService {
 	private static boolean compareRoomPhoto(HotelRoom oldData, HotelRoom updatedData) {
 		try {
 			if (oldData.getRoomPhoto() != null && updatedData.getRoomPhoto() != null) {
-				byte[] oldByte = oldData.getRoomPhoto().getBytes(1, (int) oldData.getRoomPhoto().length());
-				String oldBase64Photo = Base64.encodeBase64String(oldByte);
+				byte[] oldByte = ImageUtility.convertBlobToBytes(oldData);
+				String oldBase64Photo = ImageUtility.base64Photo(oldByte);
 
-				byte[] updatedByte = updatedData.getRoomPhoto().getBytes(1, (int) updatedData.getRoomPhoto().length());
-				String updatedBase64Photo = Base64.encodeBase64String(updatedByte);
+				byte[] updatedByte = ImageUtility.convertBlobToBytes(updatedData);
+				String updatedBase64Photo = ImageUtility.base64Photo(updatedByte);
 
 				if (oldBase64Photo.equals(updatedBase64Photo)) {
 					log.info("Room Photo is not changed");
