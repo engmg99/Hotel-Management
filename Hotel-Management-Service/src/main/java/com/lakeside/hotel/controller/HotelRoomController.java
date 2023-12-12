@@ -27,14 +27,11 @@ import com.lakeside.hotel.wrapper.HotelRoomWrapper;
 
 @RestController
 @RequestMapping("/room")
-@CrossOrigin("http://localhost:5173")
+@CrossOrigin("http://localhost:5173") // allowed CORS region for React server
 public class HotelRoomController {
 
 	@Autowired
 	private IRoomService roomService;
-
-	@Autowired
-	private BookedRoomService roomBookingService;
 
 	@PostMapping("/add/new-room")
 	public ResponseEntity<HotelRoomWrapper> addNewRoom(@RequestParam("photo") MultipartFile photo,
@@ -81,12 +78,9 @@ public class HotelRoomController {
 	@PutMapping("edit/room/{roomId}")
 	public ResponseEntity<HotelRoomWrapper> updateRoom(@PathVariable Long roomId,
 			@RequestParam(required = false) String roomType, @RequestParam(required = false) String roomPrice,
-			@RequestParam(required = false) MultipartFile photo, BindingResult results) {
+			@RequestParam(required = false) MultipartFile photo) {
 		byte[] photoBytes = null;
 		try {
-			if (results.hasErrors()) {
-				System.out.println("error");
-			}
 			HotelRoom newRoomObject = new HotelRoom();
 			newRoomObject.setId(roomId);
 			newRoomObject.setPrice(roomPrice != null ? BigDecimal.valueOf(Long.parseLong(roomPrice)) : null);

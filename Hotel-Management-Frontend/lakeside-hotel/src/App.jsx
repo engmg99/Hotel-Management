@@ -19,8 +19,6 @@ function App() {
           </Routes>
         </Router>
       </main>
-      {/* <AddRoom />
-      <ExistingRooms /> */}
     </React.Fragment>
   );
 }
