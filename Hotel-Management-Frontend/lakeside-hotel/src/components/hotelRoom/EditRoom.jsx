@@ -6,6 +6,9 @@ import { FaBackward } from "react-icons/fa";
 import RoomTypeSelector from "../common/RoomTypeSelector";
 
 const EditRoom = () => {
+  //state variable
+
+  //used to store the roomData coming from backend, make sure to map property name with backend data correctly
   const [room, setRoom] = useState({
     roomPhoto: null,
     roomType: "",
@@ -14,48 +17,54 @@ const EditRoom = () => {
   const [imgPreview, setImgPreview] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+
+  // fileInput ref variable used to store a selected Img name as value and it doesn't cause a re-render
   const fileInput = useRef(null);
 
-  const { roomId } = useParams(); // roomId as request param
+  // as we're are navigating to this page from ExistingRoom so roomId as request param is passed and we'll receive it here using useParams()
+  const { roomId } = useParams();
 
+  // this effect mthod has the roomId as dependency so for every roomId change this method will run and cause re-render
+  useEffect(() => {
+    fetchRooms(roomId);
+  }, [roomId]); // whenever this roomId is changes this function will run
+
+  //get the room data by Id
+  const fetchRooms = async (roomId) => {
+    try {
+      const roomData = await getRoomById(roomId);
+      setRoom(roomData);
+      setImgPreview("data:image/png;base64," + roomData.roomPhoto);
+      //**IMP** here we'll receive the base64Encoded img, so to display it we have appended it with some base config "data:image/png;base64,"
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  //handle the roomdata input change
   const handleRoomInputChange = (e) => {
     const { name, value } = e.target; // fieldName & fieldValue
     setRoom({ ...room, [name]: value });
   };
 
-  useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const roomData = await getRoomById(roomId);
-        // console.log(JSON.stringify(roomData));
-        setRoom(roomData);
-        setImgPreview("data:image/png;base64," + roomData.roomPhoto);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchRooms();
-  }, [roomId]); // whenever this roomId is changes this function will run
-
+  //handle the new image which needs to be updated
   const handleImageChange = async (e) => {
     const selectedImg = e.target.files[0];
     fileInput.current.files[0].name;
-    setRoom({ ...room, roomPhoto: selectedImg });
-    const base64 = await convertBase64(selectedImg);
-    setImgPreview(base64);
+    setRoom({ ...room, roomPhoto: selectedImg }); // added the selected img in roomData
+    setImgPreview(URL.createObjectURL(selectedImg)); // as image is selected from UI only so no need to convert to base64
   };
 
+  // handle the updated data of room
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      //   console.log(roomId + " " + JSON.stringify(room));
-      const response = await updateRoom(roomId, room);
-      //   console.log("response: " + JSON.stringify(response));
+      const response = await updateRoom(roomId, room); // calling updateRoom api from axios
       if (response.status === 200) {
         setSuccessMsg("Room Updated Successfully");
-        const updatedRoomData = await getRoomById(roomId);
+        const updatedRoomData = await getRoomById(roomId); // if success get the lastest data of that room
         setRoom(updatedRoomData);
-        setImgPreview(updatedRoomData.roomPhoto);
+        setImgPreview("data:image/png;base64," + updatedRoomData.roomPhoto); // received img is of type base64encoded hence appended
         setErrorMsg("");
       } else {
         setErrorMsg("Error updating room");
@@ -69,20 +78,22 @@ const EditRoom = () => {
     }, 3000);
   };
 
-  const convertBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const fileReader = new FileReader();
-      fileReader.readAsDataURL(file);
+  // if we want to convert the Image Selected from UI to base64 we can do it by below func
+  // const base64 = await convertBase64(selectedImg);
+  // const convertBase64 = (file) => {
+  //   return new Promise((resolve, reject) => {
+  //     const fileReader = new FileReader();
+  //     fileReader.readAsDataURL(file);
 
-      fileReader.onload = () => {
-        resolve(fileReader.result);
-      };
+  //     fileReader.onload = () => {
+  //       resolve(fileReader.result);
+  //     };
 
-      fileReader.onerror = (error) => {
-        reject(error);
-      };
-    });
-  };
+  //     fileReader.onerror = (error) => {
+  //       reject(error);
+  //     };
+  //   });
+  // };
 
   return (
     <React.Fragment>

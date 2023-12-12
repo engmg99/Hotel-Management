@@ -2,28 +2,34 @@ import { useEffect, useState } from "react";
 import { getRoomTypes } from "../utils/APIFunctions";
 import PropTypes from "prop-types";
 
+// as this component is called from AddRoom with some data so we'll handle that by adding props in function
 const RoomTypeSelector = (props) => {
+  // state variables
   const [roomTypes, setRoomTypes] = useState([""]);
   const [showNewRoomTypeInput, setShowNewRoomTypeInput] = useState(false);
   const [newRoomType, setNewRoomType] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
   //get all the roomTypes from backend API
+  //this method run only on first render as empty array is passed
   useEffect(() => {
+    //axios get method which get all existing room types and set it in the state variable
     getRoomTypes().then((data) => {
       setRoomTypes(data);
     });
   }, []);
 
+  //handle the input data of new room type added
   const handleNewRoomTypeInputChange = (e) => {
     setNewRoomType(e.target.value);
   };
 
+  // handle the newly added roomType
   const handleAddNewRoomType = () => {
     if (newRoomType !== "") {
-      setRoomTypes([...roomTypes, newRoomType]);
-      props.newRoom.roomType = newRoomType;
-      setNewRoomType("");
+      setRoomTypes([...roomTypes, newRoomType]); // add the new Room type in roomTypes list and also set it
+      props.newRoom.roomType = newRoomType; // set the newRoomType to the roomData received from Parent in props
+      setNewRoomType(""); // after setting it, clear the field value and hide it
       setShowNewRoomTypeInput(false);
     } else {
       setErrorMsg("Value cannot be empty.");
@@ -32,12 +38,14 @@ const RoomTypeSelector = (props) => {
       setErrorMsg("");
     }, 1000);
   };
+
   return (
     <>
       <div>
         {errorMsg && (
           <div className="alert alert-danger fade show">{errorMsg}</div>
         )}
+        {/* dropdown with value as received from props roomData */}
         <select
           className="form-control mb-2"
           name="roomType"
@@ -86,8 +94,11 @@ const RoomTypeSelector = (props) => {
     </>
   );
 };
+
+//Props validation
 RoomTypeSelector.propTypes = {
   newRoom: PropTypes.object,
   handleRoomInputChange: PropTypes.func,
 };
+
 export default RoomTypeSelector;

@@ -7,19 +7,28 @@ import { FaEdit, FaEye, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const ExistingRooms = () => {
+  //state variables
+
+  // store all rooms as an array
   const [rooms, setRooms] = useState([]);
+  // store the current activated page
   const [currentPage, setCurrentPage] = useState(1);
+  // a variable which store the roomsPerPage
   const [roomsPerPage] = useState(8);
+  // store the status of isLoading
   const [isLoading, setIsLoading] = useState(false);
+  // store the filtered rooms as an array
   const [filteredRooms, setFilteredRooms] = useState([]);
-  const [selectedRoomType] = useState("");
+  // store the success and error msg
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
+  //every first render, gets all the rooms
   useEffect(() => {
     fetchRooms();
   }, []);
 
+  // method used to get all rooms from axios request
   const fetchRooms = async () => {
     setIsLoading(true);
     try {
@@ -31,35 +40,30 @@ const ExistingRooms = () => {
     }
   };
 
+  //after fetching the rooms i tried to set the received roomList to the filteredRooms state variable i.e. setFilteredRooms(rooms);
+  //but the output was not re-rendering and the room list was not visible so to fix that issue i used a useEffect hook
+  //in which rooms depency is passed which means whenever the rooms is change this useEffect will re-render and set the filteredRooms
   useEffect(() => {
-    if (selectedRoomType === "") {
-      setFilteredRooms(rooms);
-    } else {
-      const filtered = rooms.filter(
-        (room) => room.roomType === selectedRoomType
-      );
-      setFilteredRooms(filtered);
-    }
-    setCurrentPage(1);
-  }, [rooms, selectedRoomType]);
+    setFilteredRooms(rooms); // adding all the rooms to the filteredRoom initially
+  }, [rooms]);
+  const lastRoomIndex = currentPage * roomsPerPage; // 1*8=8, 2*8=16
+  const firstRoomIndex = lastRoomIndex - roomsPerPage; // 8-8, 16-8=8
+  const currentRooms = filteredRooms.slice(firstRoomIndex, lastRoomIndex); //slice(0,8), slice(8,16)
 
-  const calcTotalPages = (filteredRooms, roomsPerPage, rooms) => {
-    const totalRooms =
-      filteredRooms.length > 0 ? filteredRooms.length : rooms.length;
-    return Math.ceil(totalRooms / roomsPerPage);
+  //paginator logic which calculate the total number of pages based on filteredRoomList and noOfRooms per page
+  const calcTotalPages = (filteredRooms, roomsPerPage) => {
+    return Math.ceil(filteredRooms.length / roomsPerPage);
   };
 
-  const lastRoomIndex = currentPage * roomsPerPage;
-  const firstRoomIndex = lastRoomIndex - roomsPerPage;
-  const currentRooms = filteredRooms.slice(firstRoomIndex, lastRoomIndex);
-
+  // this method sets the current page  on which user is and pageNo is coming from RoomPaginator component
   const handlePaginationClick = (pageNo) => {
     setCurrentPage(pageNo);
   };
 
+  //delete the room by id
   const handleDelete = async (roomId) => {
     try {
-      const result = await deleteRoom(roomId);
+      const result = await deleteRoom(roomId); // calling delete API from axios
       if (result === "") {
         setSuccessMsg(`Room No ${roomId} was deleted.`);
         fetchRooms();
@@ -78,9 +82,12 @@ const ExistingRooms = () => {
   return (
     <React.Fragment>
       {isLoading ? (
-        <p>Loading Rooms...</p>
+        <div className="d-flex justify-content-center mt-5">
+          Loading Rooms...
+        </div>
       ) : (
         <React.Fragment>
+          {/* this is basically <> </> */}
           <section className="mt-5 mb-5 container">
             {successMsg && (
               <div className="alert alert-success fade show">{successMsg}</div>
@@ -93,10 +100,13 @@ const ExistingRooms = () => {
               <h2>Existing Rooms</h2>
             </div>
             <Row>
+              {/*this Row and Col is the react bootstrap component */}
               <Col md={6} className="mb-3 mb-md-0">
+                {/* Room filter component which sends the rooms list and setFilteredRooms state Function whose state will be set in this RoomFilter comp*/}
                 <RoomFilter data={rooms} setFilteredData={setFilteredRooms} />
               </Col>
               <Col md={6} className="d-flex justify-content-end">
+                {/* Add a Navigation link to add room */}
                 <Link to={"/add-room"} className="mt-2">
                   <FaPlus />
                   Add Room
@@ -131,8 +141,10 @@ const ExistingRooms = () => {
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => {
+                            //correct way add a arrow function
                             handleDelete(room.id);
                           }}
+                          //onClick={handleDelete(room.id)} // this is the wrong way as this will be invoked on every re-render
                         >
                           <FaTrashAlt />
                         </button>
@@ -142,12 +154,11 @@ const ExistingRooms = () => {
                 })}
               </tbody>
             </table>
+            {/* RoomPaginator component in which we're passing the current page 1 is Default and totalNoOfPages which are further calculated*/}
             <RoomPaginator
               currentPage={currentPage}
-              totalPages={calcTotalPages(filteredRooms, roomsPerPage, rooms)}
-              onPageChange={() => {
-                handlePaginationClick(currentPage);
-              }}
+              totalPages={calcTotalPages(filteredRooms, roomsPerPage)}
+              onPageChange={handlePaginationClick}
             />
           </section>
         </React.Fragment>

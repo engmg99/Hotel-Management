@@ -1,10 +1,14 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
+
+//here we're receiving the rooms list and setFilteredRooms state Function, we need to set the rooms based on selected roomType
 const RoomFilter = (props) => {
+  //state variable
   const [filter, setFilter] = useState("");
 
+  //method used to make the selected roomType as filter and set the roomtype applied with filter to the props state function
   const handleSelectChange = (e) => {
-    const selectedRoomType = e.target.value;
+    const selectedRoomType = e.target.value; // selected RoomType
     setFilter(selectedRoomType);
     const filteredRooms = props.data.filter((room) =>
       room.roomType.toLowerCase().includes(selectedRoomType.toLowerCase())
@@ -12,11 +16,13 @@ const RoomFilter = (props) => {
     props.setFilteredData(filteredRooms);
   };
 
+  //this method is used to remove all the filters and setFilteredData to the roomList which contain all rooms
   const clearFilter = () => {
     setFilter("");
     props.setFilteredData(props.data);
   };
 
+  //creating the distinct roomTypes array
   const roomTypes = ["", ...new Set(props.data.map((room) => room.roomType))];
 
   return (
@@ -31,12 +37,12 @@ const RoomFilter = (props) => {
         value={filter}
         onChange={handleSelectChange}
       >
-        <option value={""}>--Select filter--</option>
+        <option value={""}>--Select Filter--</option>
         {roomTypes &&
-          roomTypes.map((type, index) => {
+          roomTypes.map((roomType, index) => {
             return (
-              <option key={index} value={String(type)}>
-                {String(type)}
+              <option key={index} value={String(roomType)}>
+                {String(roomType)}
               </option>
             );
           })}
@@ -47,6 +53,7 @@ const RoomFilter = (props) => {
     </div>
   );
 };
+//validating Props received
 RoomFilter.propTypes = {
   data: PropTypes.array,
   setFilteredData: PropTypes.func,

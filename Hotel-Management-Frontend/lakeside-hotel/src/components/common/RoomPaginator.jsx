@@ -1,6 +1,10 @@
 import PropTypes from "prop-types";
+
+//here we received the totalPages, currentPage and a onPage chagne func as props
+// we need to return the set the currentPage as active and return the pageNo if user changes it
 const RoomPaginator = (props) => {
-  const pageNumbers = Array.from({ length: props.totalPages }, (_, i) => i + 1);
+  //creating a number array from totalPages and it'll work as no to display
+  const pageNumbers = Array.from({ length: props.totalPages }, (_, i) => i + 1); //if totalPage=3, [1,2,3]
 
   return (
     <nav>
@@ -11,10 +15,17 @@ const RoomPaginator = (props) => {
               <li
                 key={pageNo}
                 className={`page-item ${
-                  props.currentPage === pageNo ? "active" : ""
+                  props.currentPage === pageNo ? "active" : "" //set the current page as active
                 }`}
               >
-                <button className="page-link" onClick={()=>{props.onPageChange(pageNo)}}>{pageNo}</button>
+                <button
+                  className="page-link"
+                  onClick={() => {
+                    props.onPageChange(pageNo); // when user change the pageNo that no is sent to the Parent thro this func
+                  }}
+                >
+                  {pageNo}
+                </button>
               </li>
             );
           })}

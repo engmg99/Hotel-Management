@@ -5,11 +5,12 @@ export const api = axios.create({
 })
 
 // adds a new room to the DB
-export async function addNewRoom(photo, roomType, roomPrice) {
-    const formData = new FormData();
-    formData.append("photo", photo);
-    formData.append("roomType", roomType);
-    formData.append("roomPrice", roomPrice);
+export async function addNewRoom(roomData) {
+
+    const formData = new FormData(); // form Data which we will handle at Backend by @RequestParams
+    formData.append("photo", roomData.roomPhoto);
+    formData.append("roomType", roomData.roomType);
+    formData.append("roomPrice", roomData.price);
 
     const response = await api.post("/room/add/new-room", formData);
     if (response.status === 200) {
@@ -58,6 +59,7 @@ export async function updateRoom(roomId, roomData) {
         //     roomType: roomData.roomType,
         //     price: roomData.roomPrice
         // }
+        // by this we'll accept it using @RequestParam
         const formData = new FormData();
         formData.append("photo", roomData.roomPhoto);
         formData.append("roomType", roomData.roomType);
