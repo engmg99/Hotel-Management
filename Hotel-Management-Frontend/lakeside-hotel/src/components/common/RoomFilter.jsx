@@ -23,7 +23,9 @@ const RoomFilter = (props) => {
   };
 
   //creating the distinct roomTypes array
-  const roomTypes = ["", ...new Set(props.data.map((room) => room.roomType))];
+  const roomTypes = [
+    ...new Set(props.data ? props.data.map((room) => room.roomType) : ""),
+  ];
 
   return (
     <div className="input-group mb-3">
@@ -37,7 +39,8 @@ const RoomFilter = (props) => {
         value={filter}
         onChange={handleSelectChange}
       >
-        <option value={""}>--Select Filter--</option>
+        <option>--Select Filter--</option>
+        <option value={""}>All</option>
         {roomTypes &&
           roomTypes.map((roomType, index) => {
             return (
