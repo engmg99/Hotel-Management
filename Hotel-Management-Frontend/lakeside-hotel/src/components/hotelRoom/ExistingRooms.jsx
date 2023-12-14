@@ -5,6 +5,7 @@ import RoomFilter from "../common/RoomFilter";
 import RoomPaginator from "../common/RoomPaginator";
 import { FaEdit, FaEye, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import Spinner from "../layouts/Spinner";
 
 const ExistingRooms = () => {
   //state variables
@@ -46,6 +47,7 @@ const ExistingRooms = () => {
   useEffect(() => {
     setFilteredRooms(rooms); // adding all the rooms to the filteredRoom initially
   }, [rooms]);
+
   const lastRoomIndex = currentPage * roomsPerPage; // 1*8=8, 2*8=16
   const firstRoomIndex = lastRoomIndex - roomsPerPage; // 8-8, 16-8=8
   const currentRooms = filteredRooms.slice(firstRoomIndex, lastRoomIndex); //slice(0,8), slice(8,16)
@@ -81,49 +83,53 @@ const ExistingRooms = () => {
 
   return (
     <React.Fragment>
+      {/* this is basically <> </> */}
       {isLoading ? (
         <div className="d-flex justify-content-center mt-5">
-          Loading Rooms...
+          <Spinner />
         </div>
       ) : (
-        <React.Fragment>
-          {/* this is basically <> </> */}
-          <section className="mt-5 mb-5 container">
-            {successMsg && (
-              <div className="alert alert-success fade show">{successMsg}</div>
-            )}
+        <section className="mt-5 mb-5 container">
+          {successMsg && (
+            <div className="alert alert-success fade show">{successMsg}</div>
+          )}
 
-            {errorMsg && (
-              <div className="alert alert-danger fade show">{errorMsg}</div>
-            )}
-            <div className="d-flex justify-content-between mb-3 mb-5">
-              <h2>Existing Rooms</h2>
-            </div>
-            <Row>
-              {/*this Row and Col is the react bootstrap component */}
-              <Col md={6} className="mb-3 mb-md-0">
-                {/* Room filter component which sends the rooms list and setFilteredRooms state Function whose state will be set in this RoomFilter comp*/}
-                <RoomFilter data={rooms} setFilteredData={setFilteredRooms} />
-              </Col>
-              <Col md={6} className="d-flex justify-content-end">
-                {/* Add a Navigation link to add room */}
-                <Link to={"/add-room"} className="mt-2">
-                  <FaPlus />
-                  Add Room
-                </Link>
-              </Col>
-            </Row>
-            <table className="table table-bordered table-hover">
-              <thead>
+          {errorMsg && (
+            <div className="alert alert-danger fade show">{errorMsg}</div>
+          )}
+          <div className="d-flex justify-content-between mb-3 mb-5">
+            <h2>Existing Rooms</h2>
+          </div>
+          <Row>
+            {/*this Row and Col is the react bootstrap component */}
+            <Col md={6} className="mb-3 mb-md-0">
+              {/* Room filter component which sends the rooms list and setFilteredRooms state Function whose state will be set in this RoomFilter comp*/}
+              <RoomFilter data={rooms} setFilteredData={setFilteredRooms} />
+            </Col>
+            <Col md={6} className="d-flex justify-content-end">
+              {/* Add a Navigation link to add room */}
+              <Link to={"/add-room"} className="mt-2">
+                <FaPlus />
+                Add Room
+              </Link>
+            </Col>
+          </Row>
+          <table className="table table-bordered table-hover">
+            <thead>
+              <tr className="text-center">
+                <th>S.No</th>
+                <th>Room Type</th>
+                <th>Room Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {!currentRooms.length > 0 ? (
                 <tr className="text-center">
-                  <th>S.No</th>
-                  <th>Room Type</th>
-                  <th>Room Price</th>
-                  <th>Actions</th>
+                  <td colSpan={6}>No Rooms Found</td>
                 </tr>
-              </thead>
-              <tbody>
-                {currentRooms.map((room, index) => {
+              ) : (
+                currentRooms.map((room, index) => {
                   return (
                     <tr key={index} className="text-center">
                       <td>{index + 1}</td>
@@ -151,17 +157,17 @@ const ExistingRooms = () => {
                       </td>
                     </tr>
                   );
-                })}
-              </tbody>
-            </table>
-            {/* RoomPaginator component in which we're passing the current page 1 is Default and totalNoOfPages which are further calculated*/}
-            <RoomPaginator
-              currentPage={currentPage}
-              totalPages={calcTotalPages(filteredRooms, roomsPerPage)}
-              onPageChange={handlePaginationClick}
-            />
-          </section>
-        </React.Fragment>
+                })
+              )}
+            </tbody>
+          </table>
+          {/* RoomPaginator component in which we're passing the current page 1 is Default and totalNoOfPages which are further calculated*/}
+          <RoomPaginator
+            currentPage={currentPage}
+            totalPages={calcTotalPages(filteredRooms, roomsPerPage)}
+            onPageChange={handlePaginationClick}
+          />
+        </section>
       )}
     </React.Fragment>
   );
