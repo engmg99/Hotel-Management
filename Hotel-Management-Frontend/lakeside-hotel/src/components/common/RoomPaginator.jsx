@@ -20,6 +20,7 @@ const RoomPaginator = (props) => {
               >
                 <button
                   className="page-link"
+                  style={{ zIndex: "auto" }} // this number was overlapping over the footer hence used zIndex
                   onClick={() => {
                     props.onPageChange(pageNo); // when user change the pageNo that no is sent to the Parent thro this func
                   }}
