@@ -17,7 +17,7 @@ public class BookingWrapper {
 	private int noOfChildren;
 	private int totalGuests;
 	private String bookingConfirmationCode;
-	private HotelRoom room;
+	private HotelRoomWrapper room;
 
 	public BookingWrapper() {
 		super();
@@ -30,6 +30,22 @@ public class BookingWrapper {
 		this.checkInDate = checkInDate;
 		this.checkOutDate = checkOutDate;
 		this.bookingConfirmationCode = bookingConfirmationCode;
+	}
+
+	public BookingWrapper(Long bookingId, LocalDate checkInDate, LocalDate checkOutDate, String guestName,
+			String guestEmail, int noOfAdults, int noOfChildren, int totalGuests, String bookingConfirmationCode,
+			HotelRoomWrapper room) {
+		super();
+		this.bookingId = bookingId;
+		this.checkInDate = checkInDate;
+		this.checkOutDate = checkOutDate;
+		this.guestName = guestName;
+		this.guestEmail = guestEmail;
+		this.noOfAdults = noOfAdults;
+		this.noOfChildren = noOfChildren;
+		this.totalGuests = totalGuests;
+		this.bookingConfirmationCode = bookingConfirmationCode;
+		this.room = room;
 	}
 
 	public Long getBookingId() {
@@ -104,11 +120,11 @@ public class BookingWrapper {
 		this.bookingConfirmationCode = bookingConfirmationCode;
 	}
 
-	public HotelRoom getRoom() {
+	public HotelRoomWrapper getRoom() {
 		return room;
 	}
 
-	public void setRoom(HotelRoom room) {
+	public void setRoom(HotelRoomWrapper room) {
 		this.room = room;
 	}
 
