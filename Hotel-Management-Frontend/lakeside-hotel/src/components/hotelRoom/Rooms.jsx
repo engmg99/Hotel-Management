@@ -25,7 +25,7 @@ const Rooms = () => {
     setIsLoading(true);
     try {
       const result = await getAllRooms();
-      setSuccessMsg("Rooms Fetched Successfully");
+      // setSuccessMsg("Rooms Fetched Successfully");
       setIsLoading(false);
       setRooms(result);
       setFilteredRooms(result);

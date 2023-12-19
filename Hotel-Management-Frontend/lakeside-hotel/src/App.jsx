@@ -8,6 +8,9 @@ import EditRoom from "./components/hotelRoom/EditRoom";
 import Navbar from "./components/layouts/Navbar";
 import Footer from "./components/layouts/Footer";
 import RoomListing from "./components/hotelRoom/RoomListing";
+import Admin from "./components/admin/Admin";
+import Checkout from "./components/roomBookings/Checkout";
+import BookingSuccess from "./components/roomBookings/BookingSuccess";
 
 function App() {
   const [appModeDarkOrLight, setAppMode] = useState("light");
@@ -32,9 +35,12 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />}></Route>
             <Route path="/add-room" element={<AddRoom />}></Route>
+            <Route path="/book-room/:roomId" element={<Checkout />}></Route>
             <Route path="/edit-room/:roomId" element={<EditRoom />}></Route>
             <Route path="/existing-rooms" element={<ExistingRooms />}></Route>
             <Route path="/browse-all-rooms" element={<RoomListing />}></Route>
+            <Route path="/admin" element={<Admin />}></Route>
+            <Route path="/booking-success" element={<BookingSuccess />}></Route>
           </Routes>
         </Router>
         <Footer />

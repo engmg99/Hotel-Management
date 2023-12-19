@@ -80,3 +80,43 @@ export async function getRoomById(roomId) {
         throw new Error("Error getting room by Id", error);
     }
 }
+
+//this will book a room
+export async function bookRoom(roomId, bookingInfo) {
+    try {
+        const response = await api.post(`/bookings/book-room/${roomId}`, bookingInfo);
+        return response.data;
+    } catch (error) {
+        throw new Error("Error while booking room", error);
+    }
+}
+
+// this will get all room booking available
+export async function getAllRoomBookings() {
+    try {
+        const response = await api.get(`/bookings/all`);
+        return response.data;
+    } catch (error) {
+        throw new Error("Error while get room booking", error);
+    }
+}
+
+/** this will get the room booking by Confirmation code */
+export async function getRoomBookingByConfirmationCode(code) {
+    try {
+        const response = await api.get(`/bookings/confirmation/${code}`);
+        return response.data;
+    } catch (error) {
+        throw new Error("Error while get room booking by code", error);
+    }
+}
+
+/** This function cancels the room booking */
+export async function cancelRoomBooking(bookingId) {
+    try {
+        const response = await api.delete(`/bookings/cancel-booking/${bookingId}`);
+        return response.data;
+    } catch (error) {
+        throw new Error("Error cancelling room booking", error);
+    }
+}
