@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
-import { getRoomById, updateRoom } from "../utils/APIFunctions";
+import { axiosGet, updateRoom } from "../utils/APIFunctions";
 import { Link } from "react-router-dom";
 import { FaBackward } from "react-icons/fa";
 import RoomTypeSelector from "../common/RoomTypeSelector";
+import { GlobalConstants } from "../constants/global-constants";
 
 const EditRoom = () => {
   //state variable
@@ -32,7 +33,7 @@ const EditRoom = () => {
   //get the room data by Id
   const fetchRooms = async (roomId) => {
     try {
-      const roomData = await getRoomById(roomId);
+      const roomData = await axiosGet(GlobalConstants.GET_ROOM_BY_ID(roomId));
       setRoom(roomData);
       setImgPreview("data:image/png;base64," + roomData.roomPhoto);
       //**IMP** here we'll receive the base64Encoded img, so to display it we have appended it with some base config "data:image/png;base64,"
@@ -62,7 +63,7 @@ const EditRoom = () => {
       const response = await updateRoom(roomId, room); // calling updateRoom api from axios
       if (response.status === 200) {
         setSuccessMsg("Room Updated Successfully");
-        const updatedRoomData = await getRoomById(roomId); // if success get the lastest data of that room
+        const updatedRoomData = await axiosGet(GlobalConstants.GET_ROOM_BY_ID(roomId)); // if success get the lastest data of that room
         setRoom(updatedRoomData);
         setImgPreview("data:image/png;base64," + updatedRoomData.roomPhoto); // received img is of type base64encoded hence appended
         setErrorMsg("");

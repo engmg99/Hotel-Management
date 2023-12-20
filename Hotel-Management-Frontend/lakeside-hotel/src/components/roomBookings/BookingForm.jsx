@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { bookRoom, getRoomById } from "../utils/APIFunctions";
-import { useNavigate, useParams } from "react-router";
+import React, { useState } from "react";
+import { axiosPost } from "../utils/APIFunctions";
+import { useNavigate } from "react-router";
 import moment from "moment/moment";
 import {
   Button,
@@ -15,96 +15,88 @@ import {
   Row,
 } from "react-bootstrap";
 import BookingSummary from "./BookingSummary";
+import PropTypes from "prop-types";
+import { GlobalConstants } from "../constants/global-constants";
 
-const BookingForm = () => {
+const BookingForm = (props) => {
   // State Variables
   const [isValidated, setIsValidated] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [roomPrice, setRoomPrice] = useState(0);
   const [bookingInfo, setBookingInfo] = useState({
     guestName: "",
     guestEmail: "",
-    checkInDate: "",
-    checkOutDate: "",
-    noOfAdults: "",
-    noOfChildren: "",
+    checkInDate: moment().format("YYYY-MM-DD"), //set the today date
+    checkOutDate: moment().add(1, "days").format("YYYY-MM-DD"), //set next date from the today date
+    noOfAdults: 2,
+    noOfChildren: 0, //by default zero childrens are there
   });
-  // const [roomInfo, setRoomInfo] = useState({
-  //   photo: "",
-  //   roomType: "",
-  //   price: "",
-  // });
-
-  // route params
-  const { roomId } = useParams();
 
   // navigation
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // used to navigate to a particular URL after performing some logic
 
-  // methods
+  // method used to handle the form inputs
   const handleInputChange = (e) => {
-    setBookingInfo({
+    const fieldName = e.target.name;
+    let fieldValue = e.target.value;
+    const bookingObj = {
       ...bookingInfo,
       [e.target.name]: e.target.value,
-    });
-  };
-
-  const getRoomPriceById = async (roomId) => {
-    try {
-      const response = await getRoomById(roomId);
-      setRoomPrice(response.price);
-      console.log(response.price);
-    } catch (error) {
-      throw new Error(error);
+    };
+    if (fieldName === "checkInDate") {
+      bookingObj["checkOutDate"] = moment(fieldValue)
+        .add(1, "days")
+        .format("YYYY-MM-DD");
     }
+    // console.log(bookingObj);
+    setBookingInfo(bookingObj);
   };
 
-  useEffect(() => {
-    getRoomPriceById(roomId);
-  }, [roomId]);
-
+  //used to calculate the payment of room
   const calcPayment = () => {
-    const checkInDate = moment(bookingInfo.checkInDate);
-    console.log(checkInDate);
-    const checkOutDate = moment(bookingInfo.checkOutDate);
-    const totalDays = checkOutDate.diff(checkInDate);
-    console.log("totalDays", totalDays);
-    console.log("roomPrice", roomPrice);
-    const price = roomPrice ? roomPrice : 0;
-    console.log("price", price);
+    const checkInDate = moment(bookingInfo.checkInDate); // checkInDate converted to Moment
+    const checkOutDate = moment(bookingInfo.checkOutDate); // checkOutDate converted to Moment
+    const totalDays = checkOutDate.diff(checkInDate, "days"); // get total number of days
+    const price = props.room?.price ? props.room?.price : 0;
     return totalDays * price;
   };
 
-  const isGuestCountValid = () => {
-    const adultCount = parseInt(bookingInfo.noOfAdults);
-    const childrenCount = parseInt(bookingInfo.noOfChildren);
-    const totalCount = adultCount + childrenCount;
-    return totalCount >= 1 && adultCount >= 1;
+  //counts the number of guests i.e adults + childrens
+  // const isGuestCountValid = () => {
+  //   const adultCount = parseInt(bookingInfo.noOfAdults);
+  //   const childrenCount = parseInt(bookingInfo.noOfChildren);
+  //   const totalCount = adultCount + childrenCount;
+  //   return totalCount >= 1;
+  // };
+
+  // ***IMP*** this method checks that the Selected dates are correct
+  // i.e Check Out date must be after Check In only
+  // I had added a functionality that if check-In date is selected, we can disable all the dates before that
+  // const isCheckOutDateValid = () => {
+  //   if (
+  //     !moment(bookingInfo.checkOutDate).isSameOrAfter(
+  //       moment(bookingInfo.checkInDate)
+  //     )
+  //   ) {
+  //     setErrorMsg("Check-Out Date must come after the Check-In Date");
+  //     return false;
+  //   } else {
+  //     setErrorMsg("");
+  //   }
+  //   return true;
+  // };
+
+  //calculates the from which date, the dates to be disabled in calender
+  const calcMinimumCheckOutDate = () => {
+    return moment(bookingInfo.checkInDate).add(1, "days").format("YYYY-MM-DD");
   };
 
-  const isCheckOutDateValid = () => {
-    if (
-      !moment(bookingInfo.checkOutDate).isSameOrAfter(
-        moment(bookingInfo.checkInDate)
-      )
-    ) {
-      setErrorMsg("Check-Out Date must come before Check-In Date");
-      return false;
-    } else {
-      setErrorMsg("");
-    }
-    return true;
-  };
-
+  // checks the form data and validation stuff
   const handleSubmit = (e) => {
     e.preventDefault();
-    const form = e.currentTarget;
-    if (
-      form.checkValidity() === false ||
-      !isGuestCountValid() ||
-      !isCheckOutDateValid()
-    ) {
+    const form = e.currentTarget; // current form
+    // console.log(form.checkValidity()); // method provided by form to check validity
+    if (form.checkValidity() === false) {
       e.stopPropagation();
     } else {
       setIsSubmitted(true);
@@ -112,26 +104,38 @@ const BookingForm = () => {
     setIsValidated(true);
   };
 
+  // submit room reservation
   const handleBooking = async () => {
     try {
-      const confirmCode = await bookRoom(roomId, bookingInfo);
+      const confirmCode = await axiosPost(
+        GlobalConstants.BOOK_ROOM_BY_ID(props.roomId),
+        bookingInfo
+      );
       setIsSubmitted(true);
       navigate("/booking-success", { state: { message: confirmCode } });
     } catch (error) {
-      setErrorMsg(error.message);
-      navigate("/booking-success", { state: { message: errorMsg } });
+      setErrorMsg(error?.response?.data);
+      navigate("/booking-success", { state: { error: error?.response?.data } });
     }
   };
+
   return (
     <React.Fragment>
       <Container className="mb-5">
+        {/* <Row>
+          <Col md={4}>
+            <img src={`data:image/jpeg;base64,${props.room.roomPhoto}`} />
+          </Col>
+        </Row> */}
         <Row>
           <Col md={6}>
             <Card>
               <CardBody>
-                <CardTitle>Reserve Room</CardTitle>
+                <CardTitle className="text-center">
+                  <h2>Reserve Room</h2>
+                </CardTitle>
                 <Form
-                  noValidate
+                  noValidate //used to disable the browser's built-in form validation.
                   validated={isValidated}
                   onSubmit={handleSubmit}
                 >
@@ -144,10 +148,11 @@ const BookingForm = () => {
                       name="guestName"
                       value={bookingInfo.guestName}
                       placeholder="Enter your full name"
+                      pattern={GlobalConstants.nameRegex}
                       onChange={handleInputChange}
                     />
                     <Form.Control.Feedback type="invalid">
-                      Please enter your full name
+                      Please enter valid name
                     </Form.Control.Feedback>
                   </Form.Group>
 
@@ -160,15 +165,18 @@ const BookingForm = () => {
                       name="guestEmail"
                       value={bookingInfo.guestEmail}
                       placeholder="Enter your email"
+                      pattern={GlobalConstants.emailRegex}
                       onChange={handleInputChange}
                     />
                     <Form.Control.Feedback type="invalid">
-                      Please enter your email
+                      Please enter valid email
                     </Form.Control.Feedback>
                   </Form.Group>
 
-                  <fieldset style={{ border: "2px" }}>
-                    <legend>Lodging Period</legend>
+                  <fieldset className="mt-2">
+                    <legend style={{ marginBottom: "0" }}>
+                      Lodging Period
+                    </legend>
                     <Row>
                       <Col md={6}>
                         <Form.Label htmlFor="checkInDate">
@@ -181,6 +189,7 @@ const BookingForm = () => {
                           name="checkInDate"
                           value={bookingInfo.checkInDate}
                           placeholder="Enter check In Date"
+                          min={new Date().toISOString().slice(0, 10)}
                           onChange={handleInputChange}
                         />
                         <Form.Control.Feedback type="invalid">
@@ -197,6 +206,7 @@ const BookingForm = () => {
                           id="checkOutDate"
                           name="checkOutDate"
                           value={bookingInfo.checkOutDate}
+                          min={calcMinimumCheckOutDate()}
                           placeholder="Enter check out Date"
                           onChange={handleInputChange}
                         />
@@ -210,8 +220,10 @@ const BookingForm = () => {
                     </Row>
                   </fieldset>
 
-                  <fieldset>
-                    <legend>Number of Guests: </legend>
+                  <fieldset className="mt-2">
+                    <legend style={{ marginBottom: "0" }}>
+                      Number of Guests:{" "}
+                    </legend>
                     <Row>
                       <Col md={6}>
                         <Form.Label htmlFor="noOfAdults">
@@ -242,15 +254,15 @@ const BookingForm = () => {
                           id="noOfChildren"
                           name="noOfChildren"
                           value={bookingInfo.noOfChildren}
-                          placeholder="0"
+                          min={0}
                           onChange={handleInputChange}
                         />
                       </Col>
                     </Row>
                   </fieldset>
 
-                  <FormGroup className="mt-2 mb-2">
-                    <Button className="btn-hotel" type="submit">
+                  <FormGroup className="mt-3 mb-1">
+                    <Button variant="btn" className="btn-hotel" type="submit">
                       Continue
                     </Button>
                   </FormGroup>
@@ -273,5 +285,8 @@ const BookingForm = () => {
     </React.Fragment>
   );
 };
-
+BookingForm.propTypes = {
+  roomId: PropTypes.string,
+  room: PropTypes.object,
+};
 export default BookingForm;

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { deleteRoom, getAllRooms } from "../utils/APIFunctions";
+import { axiosDelete, axiosGet } from "../utils/APIFunctions";
 import { Col, Row } from "react-bootstrap";
 import RoomFilter from "../common/RoomFilter";
 import RoomPaginator from "../common/RoomPaginator";
 import { FaEdit, FaEye, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import Spinner from "../layouts/Spinner";
+import { GlobalConstants } from "../constants/global-constants";
 
 const ExistingRooms = () => {
   //state variables
@@ -33,11 +34,12 @@ const ExistingRooms = () => {
   const fetchRooms = async () => {
     setIsLoading(true);
     try {
-      const result = await getAllRooms();
+      const result = await axiosGet(GlobalConstants.GET_ALL_ROOMS); // get all existing rooms
       setRooms(result);
       setIsLoading(false);
     } catch (error) {
-      setErrorMsg(error);
+      setIsLoading(false);
+      setErrorMsg(error.message);
     }
   };
 
@@ -65,7 +67,9 @@ const ExistingRooms = () => {
   //delete the room by id
   const handleDelete = async (roomId) => {
     try {
-      const result = await deleteRoom(roomId); // calling delete API from axios
+      const result = await axiosDelete(
+        GlobalConstants.DELETE_ROOM_BY_ID(roomId)
+      ); // calling delete API from axios
       if (result === "") {
         setSuccessMsg(`Room No ${roomId} was deleted.`);
         fetchRooms();

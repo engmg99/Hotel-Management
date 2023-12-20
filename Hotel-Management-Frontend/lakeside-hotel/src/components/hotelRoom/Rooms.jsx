@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import RoomCard from "./RoomCard";
-import { getAllRooms } from "../utils/APIFunctions";
+import { axiosGet } from "../utils/APIFunctions";
 import Spinner from "../layouts/Spinner";
 import { Col, Row } from "react-bootstrap";
 import RoomFilter from "../common/RoomFilter";
 import RoomPaginator from "../common/RoomPaginator";
+import { GlobalConstants } from "../constants/global-constants";
 const Rooms = () => {
   // store all rooms as an array
   const [rooms, setRooms] = useState([]);
@@ -24,20 +25,14 @@ const Rooms = () => {
   const fetchRooms = async () => {
     setIsLoading(true);
     try {
-      const result = await getAllRooms();
-      // setSuccessMsg("Rooms Fetched Successfully");
+      const result = await axiosGet(GlobalConstants.GET_ALL_ROOMS); // get all existing rooms
       setIsLoading(false);
       setRooms(result);
       setFilteredRooms(result);
     } catch (error) {
       setIsLoading(false);
-      setErrorMsg(error);
-      console.log("**error**", error);
+      setErrorMsg(error.message);
     }
-    setTimeout(() => {
-      setSuccessMsg("");
-      setErrorMsg("");
-    }, 1000);
   };
 
   useEffect(() => {
@@ -75,7 +70,9 @@ const Rooms = () => {
         <div className="alert alert-success fade show">{successMsg}</div>
       )}
       {errorMsg && (
-        <div className="alert alert-danger fade show">{errorMsg}</div>
+        <div className="alert alert-danger fade show">
+          {errorMsg.toString()}
+        </div>
       )}
       <Row>
         <Col md={6}>
