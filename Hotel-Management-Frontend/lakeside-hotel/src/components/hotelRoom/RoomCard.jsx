@@ -13,7 +13,6 @@ const RoomCard = (props) => {
               <div className="flex-shrink-0 mr-3 mb-3 mb-md-0">
                 <Link
                   to={`/book-room/${props?.room?.id}`}
-                  className="btn btn-hotel btn-sm"
                 >
                   <Card.Img
                     variant="top"

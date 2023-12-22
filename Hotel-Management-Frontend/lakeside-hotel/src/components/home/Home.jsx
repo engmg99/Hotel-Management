@@ -1,16 +1,20 @@
 import HotelService from "../common/HotelService";
 import Parallax from "../common/Parallax";
+import RoomSearch from "../common/RoomSearch";
+import RoomCarousel from "../hotelRoom/RoomCarousel";
 import MainHeader from "../layouts/MainHeader";
 
 const Home = () => {
   return (
     <section>
       <MainHeader />
-      <section className="container">
+      <div className="container">
+        <RoomSearch />
+        <RoomCarousel />
         <Parallax />
         <HotelService />
         <Parallax />
-      </section>
+      </div>
     </section>
   );
 };

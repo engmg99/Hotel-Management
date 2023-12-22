@@ -49,7 +49,7 @@ const RoomTypeSelector = (props) => {
         )}
         {/* dropdown with value as received from props roomData */}
         <select
-          className="form-control mb-2"
+          className="form-control"
           name="roomType"
           id="roomType"
           value={props.newRoom.roomType}
@@ -76,7 +76,7 @@ const RoomTypeSelector = (props) => {
             })}
         </select>
         {showNewRoomTypeInput && (
-          <div className="input-group">
+          <div className="input-group mt-2">
             <input
               className="form-control"
               type="text"

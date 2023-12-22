@@ -8,7 +8,6 @@ import {
   CardBody,
   CardTitle,
   Col,
-  Container,
   Form,
   FormControl,
   FormGroup,
@@ -44,9 +43,11 @@ const BookingForm = (props) => {
       [e.target.name]: e.target.value,
     };
     if (fieldName === "checkInDate") {
-      bookingObj["checkOutDate"] = moment(fieldValue)
-        .add(1, "days")
-        .format("YYYY-MM-DD");
+      if (fieldValue) {
+        bookingObj["checkOutDate"] = moment(fieldValue)
+          .add(1, "days")
+          .format("YYYY-MM-DD");
+      }
     }
     // console.log(bookingObj);
     setBookingInfo(bookingObj);
@@ -121,167 +122,154 @@ const BookingForm = (props) => {
 
   return (
     <React.Fragment>
-      <Container className="mb-5">
-        {/* <Row>
-          <Col md={4}>
-            <img src={`data:image/jpeg;base64,${props.room.roomPhoto}`} />
-          </Col>
-        </Row> */}
-        <Row>
-          <Col md={6}>
-            <Card>
-              <CardBody>
-                <CardTitle className="text-center">
-                  <h2>Reserve Room</h2>
-                </CardTitle>
-                <Form
-                  noValidate //used to disable the browser's built-in form validation.
-                  validated={isValidated}
-                  onSubmit={handleSubmit}
-                >
-                  <Form.Group>
-                    <Form.Label htmlFor="guestName">Full Name:</Form.Label>
+      <Col md={4}>
+        <Card>
+          <CardBody>
+            <CardTitle className="text-center">
+              <h2>Reserve Room</h2>
+            </CardTitle>
+            <Form
+              noValidate //used to disable the browser's built-in form validation.
+              validated={isValidated}
+              onSubmit={handleSubmit}
+            >
+              <Form.Group>
+                <Form.Label htmlFor="guestName">Full Name:</Form.Label>
+                <FormControl
+                  required
+                  type="text"
+                  id="guestName"
+                  name="guestName"
+                  value={bookingInfo.guestName}
+                  placeholder="Enter your full name"
+                  pattern={GlobalConstants.nameRegex}
+                  onChange={handleInputChange}
+                />
+                <Form.Control.Feedback type="invalid">
+                  Please enter valid name
+                </Form.Control.Feedback>
+              </Form.Group>
+
+              <Form.Group>
+                <Form.Label htmlFor="guestEmail">Email:</Form.Label>
+                <FormControl
+                  required
+                  type="text"
+                  id="guestEmail"
+                  name="guestEmail"
+                  value={bookingInfo.guestEmail}
+                  placeholder="Enter your email"
+                  pattern={GlobalConstants.emailRegex}
+                  onChange={handleInputChange}
+                />
+                <Form.Control.Feedback type="invalid">
+                  Please enter valid email
+                </Form.Control.Feedback>
+              </Form.Group>
+
+              <fieldset className="mt-2">
+                <legend style={{ marginBottom: "0" }}>Lodging Period</legend>
+                <Row>
+                  <Col md={6}>
+                    <Form.Label htmlFor="checkInDate">
+                      Check-In Date:
+                    </Form.Label>
                     <FormControl
                       required
-                      type="text"
-                      id="guestName"
-                      name="guestName"
-                      value={bookingInfo.guestName}
-                      placeholder="Enter your full name"
-                      pattern={GlobalConstants.nameRegex}
+                      type="date"
+                      id="checkInDate"
+                      name="checkInDate"
+                      value={bookingInfo.checkInDate}
+                      placeholder="Enter check In Date"
+                      min={new Date().toISOString().slice(0, 10)}
                       onChange={handleInputChange}
                     />
                     <Form.Control.Feedback type="invalid">
-                      Please enter valid name
+                      Please enter valid check in date
                     </Form.Control.Feedback>
-                  </Form.Group>
-
-                  <Form.Group>
-                    <Form.Label htmlFor="guestEmail">Email:</Form.Label>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Label htmlFor="checkOutDate">
+                      Check-Out Date:
+                    </Form.Label>
                     <FormControl
                       required
-                      type="text"
-                      id="guestEmail"
-                      name="guestEmail"
-                      value={bookingInfo.guestEmail}
-                      placeholder="Enter your email"
-                      pattern={GlobalConstants.emailRegex}
+                      type="date"
+                      id="checkOutDate"
+                      name="checkOutDate"
+                      value={bookingInfo.checkOutDate}
+                      min={calcMinimumCheckOutDate()}
+                      placeholder="Enter check out Date"
                       onChange={handleInputChange}
                     />
                     <Form.Control.Feedback type="invalid">
-                      Please enter valid email
+                      Please enter valid check out date
                     </Form.Control.Feedback>
-                  </Form.Group>
+                  </Col>
+                  {errorMsg && (
+                    <p className="error-message text-danger">{errorMsg}</p>
+                  )}
+                </Row>
+              </fieldset>
 
-                  <fieldset className="mt-2">
-                    <legend style={{ marginBottom: "0" }}>
-                      Lodging Period
-                    </legend>
-                    <Row>
-                      <Col md={6}>
-                        <Form.Label htmlFor="checkInDate">
-                          Check-In Date:
-                        </Form.Label>
-                        <FormControl
-                          required
-                          type="date"
-                          id="checkInDate"
-                          name="checkInDate"
-                          value={bookingInfo.checkInDate}
-                          placeholder="Enter check In Date"
-                          min={new Date().toISOString().slice(0, 10)}
-                          onChange={handleInputChange}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          Please enter valid check in date
-                        </Form.Control.Feedback>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Label htmlFor="checkOutDate">
-                          Check-Out Date:
-                        </Form.Label>
-                        <FormControl
-                          required
-                          type="date"
-                          id="checkOutDate"
-                          name="checkOutDate"
-                          value={bookingInfo.checkOutDate}
-                          min={calcMinimumCheckOutDate()}
-                          placeholder="Enter check out Date"
-                          onChange={handleInputChange}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          Please enter valid check out date
-                        </Form.Control.Feedback>
-                      </Col>
-                      {errorMsg && (
-                        <p className="error-message text-danger">{errorMsg}</p>
-                      )}
-                    </Row>
-                  </fieldset>
+              <fieldset className="mt-2">
+                <legend style={{ marginBottom: "0" }}>
+                  Number of Guests:{" "}
+                </legend>
+                <Row>
+                  <Col md={6}>
+                    <Form.Label htmlFor="noOfAdults">
+                      Number of Adults:
+                    </Form.Label>
+                    <FormControl
+                      required
+                      type="number"
+                      id="noOfAdults"
+                      name="noOfAdults"
+                      value={bookingInfo.noOfAdults}
+                      placeholder="0"
+                      min={1}
+                      onChange={handleInputChange}
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      Please select at least 1 adult.
+                    </Form.Control.Feedback>
+                  </Col>
 
-                  <fieldset className="mt-2">
-                    <legend style={{ marginBottom: "0" }}>
-                      Number of Guests:{" "}
-                    </legend>
-                    <Row>
-                      <Col md={6}>
-                        <Form.Label htmlFor="noOfAdults">
-                          Number of Adults:
-                        </Form.Label>
-                        <FormControl
-                          required
-                          type="number"
-                          id="noOfAdults"
-                          name="noOfAdults"
-                          value={bookingInfo.noOfAdults}
-                          placeholder="0"
-                          min={1}
-                          onChange={handleInputChange}
-                        />
-                        <Form.Control.Feedback type="invalid">
-                          Please select at least 1 adult.
-                        </Form.Control.Feedback>
-                      </Col>
+                  <Col md={6}>
+                    <Form.Label htmlFor="noOfChildren">Children:</Form.Label>
+                    <FormControl
+                      required
+                      type="number"
+                      id="noOfChildren"
+                      name="noOfChildren"
+                      value={bookingInfo.noOfChildren}
+                      min={0}
+                      onChange={handleInputChange}
+                    />
+                  </Col>
+                </Row>
+              </fieldset>
 
-                      <Col md={6}>
-                        <Form.Label htmlFor="noOfChildren">
-                          Children:
-                        </Form.Label>
-                        <FormControl
-                          required
-                          type="number"
-                          id="noOfChildren"
-                          name="noOfChildren"
-                          value={bookingInfo.noOfChildren}
-                          min={0}
-                          onChange={handleInputChange}
-                        />
-                      </Col>
-                    </Row>
-                  </fieldset>
-
-                  <FormGroup className="mt-3 mb-1">
-                    <Button variant="btn" className="btn-hotel" type="submit">
-                      Continue
-                    </Button>
-                  </FormGroup>
-                </Form>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col md={6}>
-            {isSubmitted && (
-              <BookingSummary
-                bookingInfo={bookingInfo}
-                payment={calcPayment()}
-                isFormValid={isValidated}
-                onConfirm={handleBooking}
-              />
-            )}
-          </Col>
-        </Row>
-      </Container>
+              <FormGroup className="mt-3 mb-1">
+                <Button variant="btn" className="btn-hotel" type="submit">
+                  Continue
+                </Button>
+              </FormGroup>
+            </Form>
+          </CardBody>
+        </Card>
+      </Col>
+      <Col md={4}>
+        {isSubmitted && (
+          <BookingSummary
+            bookingInfo={bookingInfo}
+            payment={calcPayment()}
+            isFormValid={isValidated}
+            onConfirm={handleBooking}
+          />
+        )}
+      </Col>
     </React.Fragment>
   );
 };

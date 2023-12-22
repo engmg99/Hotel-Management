@@ -22,7 +22,7 @@ const BookingSummary = ({ bookingInfo, payment, isFormValid, onConfirm }) => {
   };
 
   return (
-    <div className="card card-body" style={{ height: "100%" }}>
+    <div className="card card-body" style={{ height: "97%" }}>
       <h2 className="text-center">Reservation Summary</h2>
       <p>
         Name: <strong>{bookingInfo.guestName}</strong>

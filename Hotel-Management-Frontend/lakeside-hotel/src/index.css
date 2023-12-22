@@ -250,3 +250,8 @@ h2 {
   top: 40%;
   left: 50%;
 }
+
+.rdrDateRangePickerWrapper {
+  width: 100%;
+  border: 1px solid;
+}

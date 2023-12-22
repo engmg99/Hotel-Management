@@ -18,8 +18,11 @@ export class GlobalConstants {
 
     static GET_ALL_ROOM_TYPES = `${this.BASE_ROOM_URL}/get-room-types`
     static GET_ALL_ROOMS = `${this.BASE_ROOM_URL}/all-rooms`
-    static GET_ALL_BOOKING = `${this.BASE_BOOKING_URL}/bookings/all`
+    static GET_ALL_BOOKING = `${this.BASE_BOOKING_URL}/all`
 
+    static GET_ALL_AVAILABLE_ROOMS_BY_DATE(checkIn, checkOut, roomType) {
+        return `${this.BASE_ROOM_URL}/findRoomByDate?checkInDate=${checkIn}&checkOutDate=${checkOut}&roomType=${roomType}`;
+    }
     static GET_ROOM_BY_ID(roomId) {
         return `${this.BASE_ROOM_URL}/get/room/${roomId}`;
     }
