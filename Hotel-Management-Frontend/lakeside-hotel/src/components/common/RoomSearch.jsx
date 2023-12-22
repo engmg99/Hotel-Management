@@ -27,6 +27,11 @@ const RoomSearch = () => {
 
   const handleSearch = async (e) => {
     e.preventDefault;
+
+    setTimeout(() => {
+      setErrorMsg("");
+    }, 2000);
+
     const checkIn = moment(searchQuery.checkInDate);
     const checkOut = moment(searchQuery.checkOutDate);
     if (!checkIn.isValid() || !checkOut.isValid()) {
@@ -126,6 +131,7 @@ const RoomSearch = () => {
                 <RoomTypeSelector
                   handleRoomInputChange={handleInputChange}
                   newRoom={searchQuery}
+                  disableAddRoomType={true}
                 />
                 <Button
                   className="px-2"

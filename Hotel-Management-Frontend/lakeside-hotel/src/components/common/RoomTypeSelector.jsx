@@ -41,6 +41,14 @@ const RoomTypeSelector = (props) => {
     }, 1000);
   };
 
+  const showHideNewRoomType = () => {
+    if (props.disableAddRoomType) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
   return (
     <>
       <div>
@@ -65,7 +73,9 @@ const RoomTypeSelector = (props) => {
           }}
         >
           <option value={""}>--Select a room type--</option>
-          <option value={"Add New Room Type"}>Add New Room Type</option>
+          {showHideNewRoomType() && (
+            <option value={"Add New Room Type"}>Add New Room Type</option>
+          )}
           {roomTypes.length > 0 &&
             roomTypes.map((type, index) => {
               return (
@@ -101,6 +111,7 @@ const RoomTypeSelector = (props) => {
 RoomTypeSelector.propTypes = {
   newRoom: PropTypes.object,
   handleRoomInputChange: PropTypes.func,
+  disableAddRoomType: PropTypes.bool,
 };
 
 export default RoomTypeSelector;
