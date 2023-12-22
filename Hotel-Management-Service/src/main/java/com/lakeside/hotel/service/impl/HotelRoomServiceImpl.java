@@ -1,6 +1,7 @@
 package com.lakeside.hotel.service.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -148,5 +149,10 @@ public class HotelRoomServiceImpl implements IRoomService {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	@Override
+	public List<HotelRoom> getAvailableRoomsByDate(LocalDate checkInDate, LocalDate checkOutDate, String roomType) {
+		return roomRepo.findAvailableRoomsByDateAndType(checkInDate, checkOutDate, roomType);
 	}
 }

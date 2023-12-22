@@ -1,6 +1,7 @@
 package com.lakeside.hotel.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -22,4 +23,6 @@ public interface IRoomService {
 	public HotelRoom getRoomById(Long roomId);
 
 	public HotelRoom updateRoom(HotelRoom newRoomObject);
+
+	public List<HotelRoom> getAvailableRoomsByDate(LocalDate checkInDate, LocalDate checkOutDate, String roomType);
 }

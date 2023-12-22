@@ -1,10 +1,12 @@
 package com.lakeside.hotel.controller;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.lakeside.hotel.exception.InvalidBookingRequestException;
 import com.lakeside.hotel.model.HotelRoom;
 import com.lakeside.hotel.service.IRoomService;
 import com.lakeside.hotel.utils.ImageUtility;
@@ -127,4 +130,28 @@ public class HotelRoomController {
 //	private List<BookedRoom> getAllBookingsByRoomId(Long id) {
 //		return roomBookingService.getAllBookingsByRoomId(id);
 //	}
+
+	@GetMapping("/findRoomByDate")
+	public ResponseEntity<?> getAvailableRooms(
+			@RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkInDate,
+			@RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOutDate,
+			@RequestParam(required = true) String roomType) {
+		try {
+			List<HotelRoom> availableRooms = roomService.getAvailableRoomsByDate(checkInDate, checkOutDate, roomType);
+			List<HotelRoomWrapper> roomResponse = new ArrayList<>();
+			if (!availableRooms.isEmpty()) {
+				for (HotelRoom room : availableRooms) {
+					HotelRoomWrapper response = getHotelRoomWrapper(room);
+					byte[] photoBytes = roomService.getRoomPhotoByRoomId(room.getId());
+					response.setRoomPhoto(ImageUtility.base64Photo(photoBytes));
+					roomResponse.add(response);
+				}
+			} else {
+				return ResponseEntity.noContent().build();
+			}
+			return ResponseEntity.ok(roomResponse);
+		} catch (InvalidBookingRequestException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
 }
