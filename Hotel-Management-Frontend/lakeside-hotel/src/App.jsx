@@ -27,7 +27,7 @@ function App() {
   };
   return (
     <React.Fragment>
-      <main>
+      <main className="mainClass">
         <Router>
           <Navbar
             appMode={appModeDarkOrLight}
