@@ -2,8 +2,6 @@ package com.lakeside.hotel.wrapper;
 
 import java.time.LocalDate;
 
-import com.lakeside.hotel.model.HotelRoom;
-
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor

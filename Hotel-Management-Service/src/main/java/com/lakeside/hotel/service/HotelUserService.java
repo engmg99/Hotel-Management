@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.lakeside.hotel.model.HotelUser;
 
-public interface CustomerUserService {
+public interface HotelUserService {
 
 	public HotelUser registerUser(HotelUser user);
 

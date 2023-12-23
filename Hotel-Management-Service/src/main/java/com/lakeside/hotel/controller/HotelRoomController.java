@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,13 +28,14 @@ import com.lakeside.hotel.wrapper.HotelRoomWrapper;
 
 @RestController
 @RequestMapping("/room")
-@CrossOrigin("http://localhost:5173") // allowed CORS region for React server
+//@CrossOrigin("http://localhost:5173") // allowed CORS region for React server
 public class HotelRoomController {
 
 	@Autowired
 	private IRoomService roomService;
 
 	@PostMapping("/add/new-room")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<HotelRoomWrapper> addNewRoom(@RequestParam("photo") MultipartFile photo,
 			@RequestParam("roomType") String roomype, @RequestParam("roomPrice") BigDecimal roomPrice) {
 		try {
@@ -71,12 +72,14 @@ public class HotelRoomController {
 	}
 
 	@DeleteMapping("delete/room/{roomId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<Void> deleteRoom(@PathVariable Long roomId) {
 		roomService.deleteRoomById(roomId);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@PutMapping("edit/room/{roomId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<HotelRoomWrapper> updateRoom(@PathVariable Long roomId,
 			@RequestParam(required = false) String roomType, @RequestParam(required = false) String roomPrice,
 			@RequestParam(required = false) MultipartFile photo) {

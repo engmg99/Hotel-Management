@@ -33,7 +33,7 @@ public class RoleServiceImpl implements RoleService {
 	public Role createRole(Role role) {
 		String roleName = "ROLE_" + role.getRole().toUpperCase();
 		Role roleObj = new Role(roleName);
-		if (roleRepo.existsByRole(role)) {
+		if (roleRepo.existsByRole(roleName)) {
 			throw new RoleAlreadyExistsException(role.getRole() + " role already exists.");
 		}
 		return roleRepo.save(roleObj);

@@ -92,4 +92,10 @@ public class HotelUser {
 		this.roles = roles;
 	}
 
+	@Override
+	public String toString() {
+		return "HotelUser [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", email=" + email
+				+ ", password=" + password;
+	}
+
 }

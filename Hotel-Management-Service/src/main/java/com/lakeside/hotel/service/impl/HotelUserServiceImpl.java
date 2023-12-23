@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,15 +17,20 @@ import com.lakeside.hotel.model.HotelUser;
 import com.lakeside.hotel.model.Role;
 import com.lakeside.hotel.repository.RoleRepository;
 import com.lakeside.hotel.repository.UserRepository;
-import com.lakeside.hotel.service.CustomerUserService;
+import com.lakeside.hotel.service.HotelUserService;
 
 @Service
-public class CustomerUserServiceImpl implements CustomerUserService {
+public class HotelUserServiceImpl implements HotelUserService {
 
+	private static final Logger logger = LoggerFactory.getLogger(HotelUserServiceImpl.class);
+	
+	@Autowired
 	private UserRepository userRepo;
 
+	@Autowired
 	private RoleRepository roleRepo;
 
+	@Autowired
 	private PasswordEncoder passwordEncoder;
 
 	@Override
@@ -31,6 +39,7 @@ public class CustomerUserServiceImpl implements CustomerUserService {
 			throw new UserAlreadyExistsException(user.getEmail() + " already exists.");
 		}
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		logger.info("User: "+user);
 		Role userRole = roleRepo.findByRole("ROLE_USER").get();
 		user.setRoles(Collections.singletonList(userRole));
 		return userRepo.save(user);
