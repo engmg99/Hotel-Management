@@ -143,8 +143,18 @@ const FindRoomBooking = () => {
                 Booking Confirmation Code: {bookingInfo.bookingConfirmationCode}
               </p>
               <p>Room Number: {bookingInfo?.room?.id}</p>
-              <p>Check In Date: {bookingInfo?.checkOutDate}</p>
-              <p>Check Out Date: {bookingInfo?.checkOutDate}</p>
+              <p>
+                Check In Date:{" "}
+                {bookingInfo?.checkOutDate
+                  .subtract(1, "month")
+                  .format("MMM Do, YYYY")}
+              </p>
+              <p>
+                Check Out Date:{" "}
+                {bookingInfo?.checkOutDate
+                  .subtract(1, "month")
+                  .format("MMM Do, YYYY")}
+              </p>
               <p>Room Type: {bookingInfo?.room?.roomType}</p>
               <p>Name: {bookingInfo?.guestName}</p>
               <p>Email: {bookingInfo?.guestEmail}</p>

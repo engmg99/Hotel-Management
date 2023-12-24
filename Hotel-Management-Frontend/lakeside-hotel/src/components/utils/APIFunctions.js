@@ -4,6 +4,14 @@ export const axiosInstance = axios.create({
     baseURL: import.meta.env.VITE_BASE_URL
 })
 
+export const getHeaders = () => {
+    const token = localStorage.getItem("token");
+    return {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+    }
+}
+
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
@@ -83,6 +91,12 @@ export async function cancelRoomBooking(bookingId) {
  * @param config - Optional Axios request configuration.
  */
 export const axiosGet = async (url, config) => {
+    if (config === true) {
+        config = {
+            headers: getHeaders()
+        }
+        console.log(config)
+    }
     const response = await axiosInstance.get(url, config);
     return response.data;
 }
@@ -94,6 +108,12 @@ export const axiosGet = async (url, config) => {
  * @param {AxiosRequestConfig} [config] The configuration for the request.
  */
 export const axiosPost = async (url, data, config) => {
+    if (config === true) {
+        config = {
+            headers: getHeaders()
+        }
+        console.log(config)
+    }
     const response = await axiosInstance.post(url, data, config);
     return response.data;
 };
@@ -105,6 +125,12 @@ export const axiosPost = async (url, data, config) => {
  * @param {AxiosRequestConfig} [config] The configuration for the request.
  */
 export const axiosPut = async (url, data, config) => {
+    if (config === true) {
+        config = {
+            headers: getHeaders()
+        }
+        console.log(config)
+    }
     const response = await axiosInstance.put(url, data, config);
     return response.data;
 };
@@ -115,6 +141,12 @@ export const axiosPut = async (url, data, config) => {
  * @param {AxiosRequestConfig} [config] The optional request configuration.
  */
 export const axiosDelete = async (url, config) => {
+    if (config === true) {
+        config = {
+            headers: getHeaders()
+        }
+        console.log(config)
+    }
     const response = await axiosInstance.delete(url, config);
     return response.data;
 };

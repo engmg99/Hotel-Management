@@ -22,9 +22,12 @@ const BookingForm = (props) => {
   const [isValidated, setIsValidated] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  const currentUser = localStorage.getItem("userId");
+
   const [bookingInfo, setBookingInfo] = useState({
     guestName: "",
-    guestEmail: "",
+    guestEmail: currentUser,
     checkInDate: moment().format("YYYY-MM-DD"), //set the today date
     checkOutDate: moment().add(1, "days").format("YYYY-MM-DD"), //set next date from the today date
     noOfAdults: 2,

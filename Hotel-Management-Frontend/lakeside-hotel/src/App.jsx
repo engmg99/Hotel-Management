@@ -13,6 +13,12 @@ import Checkout from "./components/roomBookings/Checkout";
 import BookingSuccess from "./components/roomBookings/BookingSuccess";
 import Bookings from "./components/roomBookings/Bookings";
 import FindRoomBooking from "./components/roomBookings/FindRoomBooking";
+import Login from "./components/auth/Login";
+import Registration from "./components/auth/Registration";
+import Profile from "./components/auth/Profile";
+import Logout from "./components/auth/Logout";
+import { AuthProvider } from "./components/auth/AuthProvider";
+import RequireAuth from "./components/auth/RequiredAuth";
 
 function App() {
   const [appModeDarkOrLight, setAppMode] = useState("light");
@@ -27,28 +33,53 @@ function App() {
   };
   return (
     <React.Fragment>
-      <main className="mainClass">
-        <Router>
-          <Navbar
-            appMode={appModeDarkOrLight}
-            headingTitle="Lakeside Hotel"
-            toggleMode={toggleMode}
-          />
-          <Routes>
-            <Route path="/" element={<Home />}></Route>
-            <Route path="/add-room" element={<AddRoom />}></Route>
-            <Route path="/book-room/:roomId" element={<Checkout />}></Route>
-            <Route path="/edit-room/:roomId" element={<EditRoom />}></Route>
-            <Route path="/existing-rooms" element={<ExistingRooms />}></Route>
-            <Route path="/manage-bookings" element={<Bookings />}></Route>
-            <Route path="/find-booking" element={<FindRoomBooking />}></Route>
-            <Route path="/browse-all-rooms" element={<RoomListing />}></Route>
-            <Route path="/admin" element={<Admin />}></Route>
-            <Route path="/booking-success" element={<BookingSuccess />}></Route>
-          </Routes>
-        </Router>
-        <Footer />
-      </main>
+      <AuthProvider>
+        <main className="mainClass">
+          <Router>
+            <Navbar
+              appMode={appModeDarkOrLight}
+              headingTitle="Lakeside Hotel"
+              toggleMode={toggleMode}
+            />
+            <Routes>
+              <Route path="/" element={<Home />}></Route>
+              <Route path="/add-room" element={<AddRoom />}></Route>
+              <Route
+                path="/book-room/:roomId"
+                element={
+                  <RequireAuth>
+                    <Checkout />
+                  </RequireAuth>
+                }
+              ></Route>
+              <Route path="/edit-room/:roomId" element={<EditRoom />}></Route>
+              <Route path="/existing-rooms" element={<ExistingRooms />}></Route>
+              <Route path="/manage-bookings" element={<Bookings />}></Route>
+              <Route
+                path="/find-booking"
+                element={
+                  <RequireAuth>
+                    <FindRoomBooking />
+                  </RequireAuth>
+                }
+              ></Route>
+              <Route path="/browse-all-rooms" element={<RoomListing />}></Route>
+              <Route path="/admin" element={<Admin />}></Route>
+              <Route
+                path="/booking-success"
+                element={<BookingSuccess />}
+              ></Route>
+
+              <Route path="/login" element={<Login />}></Route>
+              <Route path="/register" element={<Registration />}></Route>
+
+              <Route path="/profile" element={<Profile />}></Route>
+              <Route path="/logout" element={<Logout />}></Route>
+            </Routes>
+          </Router>
+          <Footer />
+        </main>
+      </AuthProvider>
     </React.Fragment>
   );
 }
