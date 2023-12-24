@@ -7,6 +7,7 @@ public class HotelConstants {
 	
 	public static final String PUBLIC_API_1 = "/api/auth/**";
 	public static final String PUBLIC_API_2 = "/room/**";
+	public static final String PUBLIC_API_3 = "/bookings/**";
 	
 	public static final String PRIVATE_ROLE_API = "/api/roles/**";
 	

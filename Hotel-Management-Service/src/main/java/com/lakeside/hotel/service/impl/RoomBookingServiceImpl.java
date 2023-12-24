@@ -22,7 +22,7 @@ public class RoomBookingServiceImpl implements RoomBookingService {
 
 	@Override
 	public List<BookedRoom> getAllBookingsByRoomId(Long id) {
-		return roomBookingRepo.findByRoom(id);
+		return roomBookingRepo.findByRoomId(id);
 	}
 
 	@Override
@@ -75,6 +75,11 @@ public class RoomBookingServiceImpl implements RoomBookingService {
 	@Override
 	public void cancelRoomBooking(Long bookingId) {
 		roomBookingRepo.deleteById(bookingId);
+	}
+
+	@Override
+	public List<BookedRoom> getBookingsByUserEmail(String email) {
+		return roomBookingRepo.findByGuestEmail(email);
 	}
 
 }

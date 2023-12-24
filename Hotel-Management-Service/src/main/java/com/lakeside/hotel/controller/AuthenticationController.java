@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -65,6 +66,8 @@ public class AuthenticationController {
 			HotelUserDetails userDetails = (HotelUserDetails) authentication.getPrincipal();
 			List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 			return ResponseEntity.ok(new JWTResponse(userDetails.getId(), userDetails.getEmail(), token, roles));
+		} catch (BadCredentialsException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Incorrect Password");
 		} catch (Exception e) {
 			logger.error("Exception :: ", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());

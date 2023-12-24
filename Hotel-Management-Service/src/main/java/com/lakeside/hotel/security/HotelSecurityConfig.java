@@ -65,10 +65,11 @@ public class HotelSecurityConfig {
 		logger.info("Inside HotelSecurityConfig filterChain");
 		http.csrf(AbstractHttpConfigurer::disable).exceptionHandling(e -> e.authenticationEntryPoint(authEntryPoint))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(
-						auth -> auth.antMatchers(HotelConstants.PUBLIC_API_1, HotelConstants.PUBLIC_API_2).permitAll()
-								.antMatchers(HotelConstants.PRIVATE_ROLE_API).hasRole(HotelConstants.ADMIN_ROLE)
-								.anyRequest().authenticated());
+				.authorizeHttpRequests(auth -> auth
+						.antMatchers(HotelConstants.PUBLIC_API_1, HotelConstants.PUBLIC_API_2,
+								HotelConstants.PUBLIC_API_3)
+						.permitAll().antMatchers(HotelConstants.PRIVATE_ROLE_API).hasRole(HotelConstants.ADMIN_ROLE)
+						.anyRequest().authenticated());
 		http.authenticationProvider(authenticationProvider());
 		http.addFilterBefore(authenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 		return http.build();

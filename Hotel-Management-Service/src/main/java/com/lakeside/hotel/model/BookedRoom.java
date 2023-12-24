@@ -151,12 +151,12 @@ public class BookedRoom {
 		this.room = room;
 	}
 
-	@Override
-	public String toString() {
-		return "BookedRoom [bookingId=" + bookingId + ", checkInDate=" + checkInDate + ", checkOutDate=" + checkOutDate
-				+ ", guestName=" + guestName + ", guestEmail=" + guestEmail + ", noOfAdults=" + noOfAdults
-				+ ", noOfChildren=" + noOfChildren + ", totalGuests=" + totalGuests + ", bookingConfirmationCode="
-				+ bookingConfirmationCode + ", room=" + room + "]";
-	}
+//	@Override
+//	public String toString() {
+//		return "BookedRoom [bookingId=" + bookingId + ", checkInDate=" + checkInDate + ", checkOutDate=" + checkOutDate
+//				+ ", guestName=" + guestName + ", guestEmail=" + guestEmail + ", noOfAdults=" + noOfAdults
+//				+ ", noOfChildren=" + noOfChildren + ", totalGuests=" + totalGuests + ", bookingConfirmationCode="
+//				+ bookingConfirmationCode + ", room=" + room + "]";
+//	}
 
 }

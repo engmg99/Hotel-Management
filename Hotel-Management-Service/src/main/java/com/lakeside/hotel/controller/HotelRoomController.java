@@ -21,9 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.lakeside.hotel.exception.InvalidBookingRequestException;
+import com.lakeside.hotel.model.BookedRoom;
 import com.lakeside.hotel.model.HotelRoom;
 import com.lakeside.hotel.service.IRoomService;
+import com.lakeside.hotel.service.RoomBookingService;
 import com.lakeside.hotel.utils.ImageUtility;
+import com.lakeside.hotel.wrapper.BookingWrapper;
 import com.lakeside.hotel.wrapper.HotelRoomWrapper;
 
 @RestController
@@ -33,6 +36,9 @@ public class HotelRoomController {
 
 	@Autowired
 	private IRoomService roomService;
+
+	@Autowired
+	private RoomBookingService bookingService;
 
 	@PostMapping("/add/new-room")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -116,23 +122,23 @@ public class HotelRoomController {
 
 	private HotelRoomWrapper getHotelRoomWrapper(HotelRoom roomObj) {
 		try {
-//			List<BookedRoom> bookings = getAllBookingsByRoomId(roomObj.getId());
-//			System.out.println(bookings);
-//			List<BookingWrapper> bookingInfo = bookings.stream()
-//					.map(booking -> new BookingWrapper(booking.getBookingId(), booking.getCheckInDate(),
-//							booking.getCheckOutDate(), booking.getBookingConfirmationCode()))
-//					.toList();
+			List<BookedRoom> bookings = getAllBookingsByRoomId(roomObj.getId());
+			System.out.println(bookings);
+			List<BookingWrapper> bookingInfo = bookings.stream()
+					.map(booking -> new BookingWrapper(booking.getBookingId(), booking.getCheckInDate(),
+							booking.getCheckOutDate(), booking.getBookingConfirmationCode()))
+					.toList();
 			return new HotelRoomWrapper(roomObj.getId(), roomObj.getRoomType(), roomObj.getPrice(), roomObj.isBooked(),
-					ImageUtility.convertBlobToBytes(roomObj));
+					ImageUtility.convertBlobToBytes(roomObj), bookingInfo);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-//	private List<BookedRoom> getAllBookingsByRoomId(Long id) {
-//		return roomBookingService.getAllBookingsByRoomId(id);
-//	}
+	private List<BookedRoom> getAllBookingsByRoomId(Long id) {
+		return bookingService.getAllBookingsByRoomId(id);
+	}
 
 	@GetMapping("/findRoomByDate")
 	public ResponseEntity<?> getAvailableRooms(

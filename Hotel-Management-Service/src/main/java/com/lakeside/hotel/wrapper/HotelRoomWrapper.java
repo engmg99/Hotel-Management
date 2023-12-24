@@ -20,14 +20,15 @@ public class HotelRoomWrapper {
 		this.price = price;
 	}
 
-	public HotelRoomWrapper(Long id, String roomType, BigDecimal price, boolean isBooked, byte[] roomPhotoBytes) {
+	public HotelRoomWrapper(Long id, String roomType, BigDecimal price, boolean isBooked, byte[] roomPhotoBytes,
+			List<BookingWrapper> bookings) {
 		super();
 		this.id = id;
 		this.roomType = roomType;
 		this.price = price;
 		this.isBooked = isBooked;
 		this.roomPhoto = ImageUtility.base64Photo(roomPhotoBytes);
-//		this.bookings = bookings;
+		this.bookings = bookings;
 	}
 
 	public HotelRoomWrapper() {

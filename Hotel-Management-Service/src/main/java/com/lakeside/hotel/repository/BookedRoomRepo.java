@@ -9,8 +9,10 @@ import com.lakeside.hotel.model.BookedRoom;
 public interface BookedRoomRepo extends JpaRepository<BookedRoom, Long> {
 
 //	@Query("Select b from BookedRoom b where b.room =:roomId")
-	public List<BookedRoom> findByRoom(Long roomId);
+	public List<BookedRoom> findByRoomId(Long roomId);
 
 	public BookedRoom findByBookingConfirmationCode(String confirmationCode);
+	
+	public List<BookedRoom> findByGuestEmail(String email);
 
 }
