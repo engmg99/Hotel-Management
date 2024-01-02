@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -12,7 +13,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "user")
@@ -22,8 +26,12 @@ public class HotelUser {
 	private Long id;
 	private String firstName;
 	private String lastName;
+	@Column(unique = true)
 	private String email;
 	private String password;
+	@OneToOne(mappedBy = "user")
+	@JsonIgnore  // because we want this for internal mapping only
+	private RefreshToken userRefreshToken;
 	@ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH })
 	@JoinTable(name = "user_role", 
 		joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), 
@@ -32,7 +40,6 @@ public class HotelUser {
 
 	public HotelUser() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public HotelUser(String firstName, String lastName, String email, String password, Collection<Role> roles) {
@@ -82,6 +89,14 @@ public class HotelUser {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public RefreshToken getUserRefreshToken() {
+		return userRefreshToken;
+	}
+
+	public void setUserRefreshToken(RefreshToken userRefreshToken) {
+		this.userRefreshToken = userRefreshToken;
 	}
 
 	public Collection<Role> getRoles() {

@@ -123,7 +123,6 @@ public class HotelRoomController {
 	private HotelRoomWrapper getHotelRoomWrapper(HotelRoom roomObj) {
 		try {
 			List<BookedRoom> bookings = getAllBookingsByRoomId(roomObj.getId());
-			System.out.println(bookings);
 			List<BookingWrapper> bookingInfo = bookings.stream()
 					.map(booking -> new BookingWrapper(booking.getBookingId(), booking.getCheckInDate(),
 							booking.getCheckOutDate(), booking.getBookingConfirmationCode()))

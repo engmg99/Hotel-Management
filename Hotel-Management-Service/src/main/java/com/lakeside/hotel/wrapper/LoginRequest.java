@@ -1,4 +1,4 @@
-package com.lakeside.hotel.model;
+package com.lakeside.hotel.wrapper;
 
 import javax.validation.constraints.NotBlank;
 
@@ -7,6 +7,15 @@ public class LoginRequest {
 	private String email;
 	@NotBlank
 	private String password;
+	public String refreshToken;
+
+	public String getRefreshToken() {
+		return refreshToken;
+	}
+
+	public void setRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
+	}
 
 	public String getEmail() {
 		return email;

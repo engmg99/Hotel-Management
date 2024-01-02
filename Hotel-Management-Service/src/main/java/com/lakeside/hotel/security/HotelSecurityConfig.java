@@ -18,6 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.lakeside.hotel.constants.HotelConstants;
+import com.lakeside.hotel.exception.RestAccessDeniedHandler;
 import com.lakeside.hotel.security.jwt.AuthTokenFilter;
 import com.lakeside.hotel.security.jwt.JWTAuthEntryPoint;
 import com.lakeside.hotel.security.user.HotelUserDetailsService;
@@ -30,8 +31,12 @@ public class HotelSecurityConfig {
 
 	@Autowired
 	private HotelUserDetailsService userDetailService;
+
 	@Autowired
 	private JWTAuthEntryPoint authEntryPoint;
+
+	@Autowired
+	private RestAccessDeniedHandler accessDeniedHandler;
 
 	@Bean
 	AuthTokenFilter authenticationTokenFilter() {
@@ -63,13 +68,14 @@ public class HotelSecurityConfig {
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		logger.info("Inside HotelSecurityConfig filterChain");
-		http.csrf(AbstractHttpConfigurer::disable).exceptionHandling(e -> e.authenticationEntryPoint(authEntryPoint))
+		http.csrf(AbstractHttpConfigurer::disable)
+				.exceptionHandling(
+						e -> e.authenticationEntryPoint(authEntryPoint).accessDeniedHandler(accessDeniedHandler))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
-						.antMatchers(HotelConstants.PUBLIC_API_1, HotelConstants.PUBLIC_API_2,
-								HotelConstants.PUBLIC_API_3)
-						.permitAll().antMatchers(HotelConstants.PRIVATE_ROLE_API).hasRole(HotelConstants.ADMIN_ROLE)
-						.anyRequest().authenticated());
+						.antMatchers("/api/auth/login", "/api/auth/v1/refresh", "/api/auth/register-user", "/room/**")
+						.permitAll().antMatchers("/api/roles/**").hasRole(HotelConstants.ADMIN_ROLE).anyRequest()
+						.authenticated());
 		http.authenticationProvider(authenticationProvider());
 		http.addFilterBefore(authenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 		return http.build();

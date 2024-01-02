@@ -29,6 +29,7 @@ public class JWTAuthEntryPoint implements AuthenticationEntryPoint {
 		logger.info("Inside JWTAuthEntryPoint");
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//		response.setHeader(HttpHeaders.SET_COOK	IE,"ee");
 
 		final Map<String, Object> body = new HashMap<>();
 		body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
@@ -40,8 +41,6 @@ public class JWTAuthEntryPoint implements AuthenticationEntryPoint {
 
 		final ObjectMapper mapper = new ObjectMapper();
 		mapper.writeValue(response.getOutputStream(), body);
-
-		logger.info("mapper:: " + mapper);
 	}
 
 }
