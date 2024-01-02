@@ -25,10 +25,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakeside.hotel.constants.HotelConstants;
-import com.lakeside.hotel.exception.InvalidAuthToken;
 import com.lakeside.hotel.security.user.HotelUserDetailsService;
 import com.lakeside.hotel.utils.SecurityCipher;
 import com.lakeside.hotel.wrapper.LoginResponse;
+
+import io.jsonwebtoken.ExpiredJwtException;
 
 @Component
 public class AuthTokenFilter extends OncePerRequestFilter {
@@ -62,8 +63,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 				String JWTToken = getJWT(request, true);
 				if (JWTToken != null) {
 					Map<String, String> jwtTokenMap = jwtUtils.validateToken(JWTToken);
-					if (jwtTokenMap != null && jwtTokenMap.containsKey("validated")
-							&& jwtTokenMap.get("validated").equals("true")) {
+					if (!jwtUtils.isTokenExpired(JWTToken) && jwtTokenMap != null
+							&& jwtTokenMap.containsKey("validated") && jwtTokenMap.get("validated").equals("true")) {
 						String email = jwtUtils.getUserNameFromToken(JWTToken);
 						UserDetails userDetails = hotelUserDetailService.loadUserByUsername(email);
 						var authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
@@ -94,11 +95,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 //						mapper.writeValue(response.getOutputStream(), body);
 //					}
 				}
-			} catch (InvalidAuthToken ex) {
-				// this is very important, since it guarantees the user is not authenticated at
-				// all
+			} catch (ExpiredJwtException ex) {
+				// this is important, since it guarantees the user is not authenticated at all
 				SecurityContextHolder.clearContext();
-				response.sendError(ex.getHttpStatus().value(), ex.getMessage());
+				response.sendError(401, "Invalid Token");
 				return;
 			} catch (Exception e) {
 				logger.error("Cannot set user authentication : {} ", e.getMessage());

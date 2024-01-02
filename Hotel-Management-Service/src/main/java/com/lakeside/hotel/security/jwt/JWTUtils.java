@@ -13,21 +13,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import com.lakeside.hotel.exception.InvalidAuthToken;
 import com.lakeside.hotel.model.HotelUser;
 import com.lakeside.hotel.security.user.HotelUserDetailsService;
 import com.lakeside.hotel.wrapper.UserToken;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -42,17 +39,14 @@ public class JWTUtils {
 	@Value("${auth.token.jwtSecret}")
 	private String jwtSecret;
 
-	@Value("${auth.access.token.expirationInMils}")
-	private static long JWT_Access_Expiration_Hours;
+	@Value("${auth.access.token.expiration}")
+	private long JWT_Access_Expiration;
 
-	@Value("${auth.refresh.token.expirationInMils}")
-	private static long JWT_Refresh_Expiration_Hours;
+	@Value("${auth.refresh.token.expiration}")
+	private long JWT_Refresh_Expiration;
 
 	@Value("${jwt.cookieExpiry}")
 	private int cookieExpiry;
-
-	private static final long ACCESS_EXP_TIME = JWT_Access_Expiration_Hours * 60 * 60 * 1000;
-	private static final long REFRESH_EXP_TIME = JWT_Refresh_Expiration_Hours * 60 * 60 * 1000;
 
 	@Autowired
 	private HotelUserDetailsService myUserDetails;
@@ -83,20 +77,23 @@ public class JWTUtils {
 		return Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token).getBody();
 	}
 
-	private Boolean isTokenExpired(String token) {
+	public Boolean isTokenExpired(String token) {
 		return extractExpiration(token).before(new Date());
 	}
 
-	public UserToken generateAccessToken(String username) {
-		Map<String, Object> claims = new HashMap<>();
-		return createAccessToken(claims, username);
+	public UserToken generateAccessToken(HotelUser user) {
+		Claims claims = Jwts.claims().setSubject(user.getEmail());
+
+		claims.put("auth", user.getRoles().stream().map(s -> new SimpleGrantedAuthority(s.getRole()))
+				.filter(Objects::nonNull).collect(Collectors.toList()));
+		return createAccessToken(claims, user.getEmail());
 	}
 
-	private UserToken createAccessToken(Map<String, Object> claims, String username) {
+	private UserToken createAccessToken(Claims claims, String username) {
 
 		Date now = new Date();
-		Long duration = now.getTime() + ACCESS_EXP_TIME;
-		Instant expiryDate = Instant.now().plusMillis(ACCESS_EXP_TIME);
+		Long duration = now.getTime() + JWT_Access_Expiration;
+		Instant expiryDate = Instant.now().plusMillis(JWT_Access_Expiration);
 
 		String jwtToken = Jwts.builder().setClaims(claims).setSubject(username)
 				.setIssuedAt(new Date(System.currentTimeMillis())).setExpiration(Date.from(expiryDate))
@@ -113,8 +110,8 @@ public class JWTUtils {
 		claims.put("auth", user.getRoles().stream().map(s -> new SimpleGrantedAuthority(s.getRole()))
 				.filter(Objects::nonNull).collect(Collectors.toList()));
 		Date now = new Date();
-		Long duration = now.getTime() + REFRESH_EXP_TIME;
-		Instant expiryDate = Instant.now().plusMillis(REFRESH_EXP_TIME);
+		Long duration = now.getTime() + JWT_Refresh_Expiration;
+		Instant expiryDate = Instant.now().plusMillis(JWT_Refresh_Expiration);
 
 		String jwtToken = Jwts.builder().setClaims(claims).setSubject(user.getEmail())
 				.setIssuedAt(new Date(System.currentTimeMillis())).setExpiration(Date.from(expiryDate))
@@ -147,6 +144,10 @@ public class JWTUtils {
 		try {
 			Jwts.parserBuilder().setSigningKey(key()).build().parse(token);
 			mapToReturn.put("validated", "true");
+		} catch (ExpiredJwtException e) {
+			logger.error("Expired JWT Token : {} ", e.getMessage());
+			mapToReturn.put("validated", "false");
+			mapToReturn.put("exception", e.getMessage());
 		} catch (MalformedJwtException e) {
 			logger.error("Invalid JWT Token : {} ", e.getMessage());
 			mapToReturn.put("validated", "false");
@@ -155,8 +156,10 @@ public class JWTUtils {
 			logger.error("This token is not supported : {} ", e.getMessage());
 			mapToReturn.put("validated", "false");
 			mapToReturn.put("exception", e.getMessage());
-		} catch (JwtException | IllegalArgumentException e) {
-			throw new InvalidAuthToken("Expired or invalid JWT token", HttpStatus.UNAUTHORIZED);
+		} catch (IllegalArgumentException e) {
+			logger.error("IllegalArgumentException : {} ", e.getMessage());
+			mapToReturn.put("validated", "false");
+			mapToReturn.put("exception", e.getMessage());
 		}
 		return mapToReturn;
 	}

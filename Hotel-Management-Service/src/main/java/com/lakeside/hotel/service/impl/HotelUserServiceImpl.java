@@ -83,15 +83,17 @@ public class HotelUserServiceImpl implements HotelUserService {
 		HotelUser user = userRepo.findByEmail(email)
 				.orElseThrow(() -> new UserNotFoundException("User not found with email " + email));
 
+		// when user logs in first time both access and refresh would be null
+		// so generate new tokens
 		if (accessToken == null && refreshToken == null) {
-			newAccessToken = jwtUtils.generateAccessToken(user.getEmail());
+			newAccessToken = jwtUtils.generateAccessToken(user);
 			newRefreshToken = jwtUtils.generateRefreshToken(user);
 			addAccessTokenCookie(responseHeaders, newAccessToken);
 			addRefreshTokenCookie(responseHeaders, newRefreshToken);
-			mapToReturn.put("httpHeaders", responseHeaders);
-			return mapToReturn;
 		}
 
+		// when user logs in when both access and refresh tokens are expired
+		// so generate new tokens
 		if (accessToken != null && !accessToken.isEmpty() && !accessToken.isBlank()) {
 			Map<String, String> jwtTokenMap = jwtUtils.validateToken(accessToken);
 			isAccessTokenValid = Boolean.parseBoolean(jwtTokenMap.get("validated"));
@@ -100,22 +102,13 @@ public class HotelUserServiceImpl implements HotelUserService {
 			Map<String, String> jwtTokenMap = jwtUtils.validateToken(refreshToken);
 			isRefreshTokenValid = Boolean.parseBoolean(jwtTokenMap.get("validated"));
 		}
-
-		if (isAccessTokenValid != null && isRefreshTokenValid != null) {
-			// if accessToken is expired and refreshToken is also expired
-			if (!isAccessTokenValid && !isRefreshTokenValid) {
-				newAccessToken = jwtUtils.generateAccessToken(user.getEmail());
-				newRefreshToken = jwtUtils.generateRefreshToken(user);
-				addAccessTokenCookie(responseHeaders, newAccessToken);
-				addRefreshTokenCookie(responseHeaders, newRefreshToken);
-			}
-
-			// if accessToken is expired but refreshToken is valid
-			if (!isAccessTokenValid && isRefreshTokenValid) {
-				newAccessToken = jwtUtils.generateAccessToken(user.getEmail());
-				addAccessTokenCookie(responseHeaders, newAccessToken);
-			}
+		if (isAccessTokenValid != null && !isAccessTokenValid && isRefreshTokenValid != null && !isRefreshTokenValid) {
+			newAccessToken = jwtUtils.generateAccessToken(user);
+			newRefreshToken = jwtUtils.generateRefreshToken(user);
+			addAccessTokenCookie(responseHeaders, newAccessToken);
+			addRefreshTokenCookie(responseHeaders, newRefreshToken);
 		}
+		mapToReturn.put("httpHeaders", responseHeaders);
 		return mapToReturn;
 	}
 
@@ -130,7 +123,8 @@ public class HotelUserServiceImpl implements HotelUserService {
 			return mapToReturn;
 		}
 		String username = jwtUtils.getUserNameFromToken(refreshToken);
-		UserToken newAccessToken = jwtUtils.generateAccessToken(username);
+		HotelUser user = getUser(username);
+		UserToken newAccessToken = jwtUtils.generateAccessToken(user);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add(HttpHeaders.SET_COOKIE, cookieUtils
 				.createAccessTokenCookie(newAccessToken.getTokenValue(), newAccessToken.getDuration()).toString());
