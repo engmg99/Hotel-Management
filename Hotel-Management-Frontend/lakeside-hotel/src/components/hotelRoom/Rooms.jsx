@@ -19,7 +19,7 @@ const Rooms = () => {
   // store the filtered rooms as an array
   const [filteredRooms, setFilteredRooms] = useState([]);
   // store the success and error msg
-  const [successMsg, setSuccessMsg] = useState("");
+  const [successMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
   const fetchRooms = async () => {

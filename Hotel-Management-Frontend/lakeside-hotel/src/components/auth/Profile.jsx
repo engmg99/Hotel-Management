@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { axiosDelete, axiosGet } from "../utils/APIFunctions";
@@ -15,10 +15,10 @@ const Profile = () => {
 
   const [bookings, setBookings] = useState([
     {
-      id: "",
+      bookingId: "",
       room: { id: "", roomType: "" },
-      checkInDate: "",
-      checkOutDate: "",
+      checkIn: "",
+      checkOut: "",
       bookingConfirmationCode: "",
     },
   ]);
@@ -29,7 +29,7 @@ const Profile = () => {
 
   const userId = localStorage.getItem("userId");
   console.log("userId", userId);
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
       const userData = await axiosGet(
         GlobalConstants.GET_USER_BY_ID(userId),
@@ -41,22 +41,53 @@ const Profile = () => {
       console.error(error);
       setErrorMessage(error.message);
     }
-  };
+  }, [userId]);
 
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     try {
-      const response = await axiosGet(GlobalConstants.GET_ALL_BOOKING_DONE_BY_USER(userId),true);
+      const response = await axiosGet(
+        GlobalConstants.GET_ALL_BOOKING_DONE_BY_USER(userId),
+        true
+      );
       setBookings(response);
     } catch (error) {
       console.error("Error fetching bookings:", error.message);
       setErrorMessage(error.message);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
+    // let isMounted = true;
+    // const controller = new AbortController();
     fetchUser();
+    // const fetchBookings = async () => {
+    //   try {
+    //     const response = await axiosPrivate.get(
+    //       GlobalConstants.GET_ALL_BOOKING_DONE_BY_USER(userId)
+    //       // {
+    //       //   signal: controller.signal,
+    //       // }
+    //     );
+    //     console.log(response.data);
+    //     isMounted && setBookings(response.data);
+    //     // const response = await axiosGet(
+    //     //   GlobalConstants.GET_ALL_BOOKING_DONE_BY_USER(userId),
+    //     //   true
+    //     // );
+    //     // setBookings(response);
+    //   } catch (error) {
+    //     console.error("Error fetching bookings:", error.message);
+    //     setErrorMessage(error.message);
+    //   }
+    // };
+
     fetchBookings();
-  }, []);
+
+    // return () => {
+    //   isMounted = false;
+    //   controller.abort();
+    // };
+  }, [fetchUser, fetchBookings]);
 
   const handleDeleteAccount = async () => {
     const confirmed = window.confirm(
@@ -191,16 +222,16 @@ const Profile = () => {
                   <tbody>
                     {bookings.map((booking, index) => (
                       <tr key={index}>
-                        <td>{booking.id}</td>
+                        <td>{booking.bookingId}</td>
                         <td>{booking.room.id}</td>
                         <td>{booking.room.roomType}</td>
                         <td>
-                          {moment(booking.checkInDate)
+                          {moment(booking.checkIn)
                             .subtract(1, "month")
                             .format("MMM Do, YYYY")}
                         </td>
                         <td>
-                          {moment(booking.checkOutDate)
+                          {moment(booking.checkOut)
                             .subtract(1, "month")
                             .format("MMM Do, YYYY")}
                         </td>

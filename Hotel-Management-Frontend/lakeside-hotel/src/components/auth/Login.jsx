@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { axiosPost } from "../utils/APIFunctions";
 import { GlobalConstants } from "../constants/global-constants";
@@ -18,6 +18,19 @@ const Login = () => {
   const auth = useContext(AuthContext);
   const location = useLocation();
   const redirectUrl = location.state?.path || "/";
+
+  useEffect(() => {
+    console.log("Login User Session", auth.authUserDetails);
+    if (auth.authUserDetails?.status === "Invalid Token") {
+      // setErrorMessage("JWT Token Expired");
+      // auth.refreshToken();
+    } else if (auth.authUserDetails?.status === "Token Not Present") {
+      setErrorMessage("Invalid Session. Log In Again.");
+    }
+    return () => {
+      setErrorMessage("");
+    };
+  }, [auth]);
 
   const handleInputChange = (e) => {
     setLogin({ ...login, [e.target.name]: e.target.value });
@@ -41,8 +54,7 @@ const Login = () => {
         if (loginResult) {
           setErrorMessage("");
           console.log("loginResult: ", loginResult);
-          const token = loginResult?.token;
-          auth.handleLogin(token);
+          auth.handleLogin(loginResult);
           navigate(redirectUrl, { replace: true });
         }
       } catch (error) {
@@ -91,6 +103,7 @@ const Login = () => {
             type="password"
             id="password"
             name="password"
+            autoComplete="off"
             value={login.password}
             placeholder="Enter password"
             // pattern={GlobalConstants.emailRegex}

@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import BookingForm from "./BookingForm";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { axiosGet } from "../utils/APIFunctions";
 import { GlobalConstants } from "../constants/global-constants";
 import { Col, Row, Container } from "react-bootstrap";
@@ -36,11 +36,11 @@ const Checkout = () => {
   };
 
   // fetch data
-  // useEffect(() => {
-  //   getRoomPriceById(roomId);
-  // }, [roomId]);
+  useEffect(() => {
+    getRoomPriceById(roomId);
+  }, [roomId]);
 
-  getRoomPriceById(roomId); // calls the above method and gets the Room Price
+  // getRoomPriceById(roomId); // calls the above method and gets the Room Price
 
   return (
     <div className="mt-5 mb-5">

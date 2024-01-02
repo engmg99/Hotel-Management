@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import { axiosPost } from "../utils/APIFunctions";
 import { GlobalConstants } from "../constants/global-constants";
 import { Container, Form, FormControl } from "react-bootstrap";
+import { FaInfoCircle } from "react-icons/fa";
 
 const Registration = () => {
-  const [isValidated, setIsValidated] = useState(true);
+  const [isValidated, setIsValidated] = useState(false);
+  const [matchPwd, setMatchPwd] = useState("");
   const [registration, setRegistration] = useState({
     firstName: "",
     lastName: "",
@@ -16,14 +18,38 @@ const Registration = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  // useEffect(() => {
+  //   userRef.current.focus();
+  // }, []);
+
   const handleInputChange = (e) => {
-    setRegistration({ ...registration, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name == "matchPwd") {
+      if (value !== registration.password) {
+        setIsValidated(true);
+      }
+      setMatchPwd(value);
+    } else {
+      setRegistration({ ...registration, [name]: value });
+    }
   };
 
-  const validateLoginForm = (e) => {
+  const checkPwdMatch = () => {
+    if (matchPwd !== registration.password) {
+      return false;
+    }
+    return true;
+  };
+
+  const validateRegistrationForm = (e) => {
     const form = e.currentTarget;
     if (form.checkValidity() === false) {
+      e.preventDefault();
+      e.stopPropagation();
       setIsValidated(true);
+      return false;
+    }
+    if (!checkPwdMatch()) {
       return false;
     }
     return true;
@@ -31,7 +57,7 @@ const Registration = () => {
 
   const handleRegistration = async (e) => {
     e.preventDefault();
-    if (validateLoginForm(e)) {
+    if (validateRegistrationForm(e)) {
       try {
         const result = await axiosPost(
           GlobalConstants.REGISTER_USER,
@@ -78,12 +104,17 @@ const Registration = () => {
               id="firstName"
               name="firstName"
               value={registration.firstName}
+              pattern={GlobalConstants.firstLastNameRegex}
               placeholder="Enter first name"
-              pattern={GlobalConstants.nameRegex}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
-              Please enter valid first name
+              <p className="instructions">
+                <FaInfoCircle />
+                4 to 24 characters.
+                <br />
+                Only Letters are allowed.
+              </p>
             </Form.Control.Feedback>
           </div>
         </div>
@@ -100,7 +131,7 @@ const Registration = () => {
               type="text"
               value={registration.lastName}
               placeholder="Enter last name"
-              pattern={GlobalConstants.nameRegex}
+              pattern={GlobalConstants.firstLastNameRegex}
               onChange={handleInputChange}
             />
             <Form.Control.Feedback type="invalid">
@@ -115,6 +146,7 @@ const Registration = () => {
           </Form.Label>
           <div className="col-sm-10">
             <FormControl
+              required
               id="email"
               name="email"
               type="email"
@@ -123,6 +155,9 @@ const Registration = () => {
               pattern={GlobalConstants.emailRegex}
               onChange={handleInputChange}
             />
+            <Form.Control.Feedback type="invalid">
+              Please enter valid email
+            </Form.Control.Feedback>
           </div>
         </div>
 
@@ -136,12 +171,59 @@ const Registration = () => {
               type="password"
               id="password"
               name="password"
+              autoComplete="off"
               value={registration.password}
               placeholder="Enter password"
+              pattern={GlobalConstants.PWD_REGEX}
               onChange={handleInputChange}
             />
+            <Form.Control.Feedback type="invalid">
+              <p className="instructions">
+                <FaInfoCircle />
+                8 to 24 characters.
+                <br />
+                Must include uppercase and lowercase letters, a number and a
+                special character.
+                <br />
+                Allowed special characters:{" "}
+                <span aria-label="exclamation mark">!</span>{" "}
+                <span aria-label="at symbol">@</span>{" "}
+                <span aria-label="hashtag">#</span>{" "}
+                <span aria-label="dollar sign">$</span>{" "}
+                <span aria-label="percent">%</span>
+              </p>
+            </Form.Control.Feedback>
           </div>
         </div>
+
+        <div className="mb-3 row">
+          <Form.Label htmlFor="matchPwd" className="col-sm-2 col-form-label">
+            Confirm Password
+          </Form.Label>
+          <div className="col-sm-10">
+            <FormControl
+              required
+              type="password"
+              id="matchPwd"
+              name="matchPwd"
+              autoComplete="off"
+              value={matchPwd}
+              placeholder="Re-enter password"
+              onChange={handleInputChange}
+            />
+            {!checkPwdMatch() ? (
+              <p className="instructions">
+                <FaInfoCircle />
+                Must match the password input field.
+              </p>
+            ) : (
+              <Form.Control.Feedback type="invalid">
+                Value cannot be blank
+              </Form.Control.Feedback>
+            )}
+          </div>
+        </div>
+
         <div className="mb-3">
           <button
             type="submit"

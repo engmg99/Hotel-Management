@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { axiosDelete, axiosGet } from "../utils/APIFunctions";
 import { Col, Row } from "react-bootstrap";
 import RoomFilter from "../common/RoomFilter";
@@ -7,6 +7,7 @@ import { FaEdit, FaEye, FaPlus, FaTrashAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import Spinner from "../layouts/Spinner";
 import { GlobalConstants } from "../constants/global-constants";
+import axios from "axios";
 
 const ExistingRooms = () => {
   //state variables
@@ -25,23 +26,31 @@ const ExistingRooms = () => {
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  //every first render, gets all the rooms
-  useEffect(() => {
-    fetchRooms();
-  }, []);
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
 
   // method used to get all rooms from axios request
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     setIsLoading(true);
     try {
-      const result = await axiosGet(GlobalConstants.GET_ALL_ROOMS); // get all existing rooms
+      const result = await axiosGet(GlobalConstants.GET_ALL_ROOMS, {
+        cancelToken: source.token,
+      }); // get all existing rooms
       setRooms(result);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       setErrorMsg(error.message);
     }
-  };
+  }, []);
+
+  //every first render, gets all the rooms
+  useEffect(() => {
+    fetchRooms();
+    return () => {
+      source.cancel("Request canceled");
+    };
+  }, [fetchRooms, source]);
 
   //after fetching the rooms i tried to set the received roomList to the filteredRooms state variable i.e. setFilteredRooms(rooms);
   //but the output was not re-rendering and the room list was not visible so to fix that issue i used a useEffect hook

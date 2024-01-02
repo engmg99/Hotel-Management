@@ -1,20 +1,19 @@
 import { Link, NavLink } from "react-router-dom";
 import PropTypes from "prop-types";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { FaMoon, FaSun } from "react-icons/fa";
 import Logout from "../auth/Logout";
-import { AuthContext } from "../auth/AuthProvider";
+import useAuth from "../hooks/useAuth";
 
 const Navbar = (props) => {
+  const auth = useAuth();
+
   const [showAccount, setShowAccount] = useState(false);
-
-  const auth = useContext(AuthContext);
-
   const handleAccountClick = () => {
     setShowAccount(!showAccount);
   };
 
-  const isLoggedIn = auth.user !== null;
+  const isLoggedIn = auth.authUserDetails?.email;
   const userRole = localStorage.getItem("userRole");
 
   return (

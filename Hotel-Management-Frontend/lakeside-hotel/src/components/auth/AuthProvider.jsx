@@ -1,34 +1,70 @@
-import { createContext, useState } from "react";
-import { jwtDecode } from "jwt-decode";
+import { createContext, useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { axiosGet } from "../utils/APIFunctions";
+import axios from "axios";
 
 export const AuthContext = createContext({
-  user: null,
+  authUserDetails: {},
   handleLogin: () => {},
   handleLogout: () => {},
 });
 
 export const AuthProvider = (props) => {
-  const [user, setUser] = useState(null);
+  const [authUserDetails, setAuthUserDetails] = useState({});
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
 
-  const handleLogin = (token) => {
-    const decodedUser = jwtDecode(token);
-    console.log("decodedUser", decodedUser);
-    localStorage.setItem("userId", decodedUser.sub);
-    localStorage.setItem("userRole", decodedUser.roles.join(","));
-    localStorage.setItem("token", token);
-    setUser(decodedUser);
+  const validateLoggedInUserSession = useCallback(async () => {
+    try {
+      const sessionResponse = await axiosGet("/api/auth/check-status", {
+        cancelToken: source.token,
+      });
+      if (sessionResponse) {
+        handleLogin(sessionResponse);
+        if (sessionResponse.message !== "Login successful") {
+          removeUserLocalStorage();
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    validateLoggedInUserSession();
+    return () => {
+      source.cancel("Request canceled");
+    };
+  }, [validateLoggedInUserSession, source]);
+
+  const handleLogin = (user) => {
+    setAuthUserDetails(user);
+    setUserLocalStorage(user);
   };
 
   const handleLogout = () => {
+    removeUserLocalStorage();
+    setAuthUserDetails(null);
+  };
+
+  const setUserLocalStorage = (user) => {
+    localStorage.setItem("userId", user?.email);
+    localStorage.setItem("userRole", user?.roles?.join(","));
+  };
+
+  const removeUserLocalStorage = () => {
     localStorage.removeItem("userId");
     localStorage.removeItem("userRole");
-    localStorage.removeItem("token");
-    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, handleLogin, handleLogout }}>
+    <AuthContext.Provider
+      value={{
+        authUserDetails,
+        handleLogin,
+        handleLogout,
+      }}
+    >
       {props.children}
     </AuthContext.Provider>
   );

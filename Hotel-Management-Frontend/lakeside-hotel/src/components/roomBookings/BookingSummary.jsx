@@ -15,10 +15,8 @@ const BookingSummary = ({ bookingInfo, payment, isFormValid, onConfirm }) => {
     setTimeout(() => {
       setIsProcessingPayment(false);
       setIsBookingConfirmed(true);
-    }, 3000);
-    setTimeout(() => {
       onConfirm();
-    }, 6000);
+    }, 3000);
   };
 
   return (

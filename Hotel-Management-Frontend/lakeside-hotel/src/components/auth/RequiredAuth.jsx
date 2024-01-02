@@ -1,17 +1,15 @@
-import { Navigate, useLocation } from "react-router-dom";
-import PropTypes from "prop-types";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
-const RequireAuth = ({ children }) => {
-  const user = localStorage.getItem("userId");
+const RequireAuth = () => {
+  const auth = useAuth();
   const location = useLocation();
-  if (!user) {
-    return <Navigate to="/login" state={{ path: location.pathname }} />;
-  }
-  return children;
-};
 
-RequireAuth.propTypes = {
-  children: PropTypes.node,
+  return auth.authUserDetails?.email ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/login" state={{ path: location.pathname }} replace />
+  );
 };
 
 export default RequireAuth;

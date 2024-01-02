@@ -1,7 +1,11 @@
 import axios from "axios";
+import { GlobalConstants } from "../constants/global-constants";
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_BASE_URL
+    baseURL: BASE_URL,
+    headers: { 'Content-Type': 'application/json' },
+    withCredentials: true
 })
 
 export const getHeaders = () => {
@@ -12,15 +16,47 @@ export const getHeaders = () => {
     }
 }
 
-axiosInstance.interceptors.response.use(
-    (response) => response,
+axiosInstance.interceptors.request.use(
+    (config) => {
+        // console.log('Req Intercept Config: ', config)
+        return config
+    },
     (error) => {
-        if (axios.isCancel(error)) {
-            window.console.log('Request canceled', error.message);
+        // console.log('Req Intercept Error: ', error)
+        return Promise.reject(error)
+    }
+);
+
+axiosInstance.interceptors.response.use(
+    (response) => {
+        // console.log('Res Intercept Response: ', response)
+        return response;
+    },
+    (error) => {
+        // console.log('Res Intercept Error: ', error)
+        const originalConfig = error.config;
+        const errResponse = error.response;
+        if (originalConfig.url === GlobalConstants.VALIDATE_USER_SESSION && errResponse) {
+            // Access Token was expired
+            if (errResponse.status === 401) {
+                //call refresh token api to generate new access token if the refreshToken is not expired
+                refreshToken();
+            }
         }
         return Promise.reject(error);
     }
 );
+
+const refreshToken = async () => {
+    try {
+        const tokenRefresh = await axiosGet(GlobalConstants.TOKEN_REFRESH);
+        if (tokenRefresh) {
+            console.log("tokenRefresh", tokenRefresh);
+        }
+    } catch (error) {
+        return Promise.reject(error);
+    }
+};
 
 // adds a new room to the DB
 export async function addNewRoom(roomData) {

@@ -1,13 +1,16 @@
 export class GlobalConstants {
     //Message
     static genericError = 'Something went wrong. Please try again later.';
+    static userLogoutMsg = 'Logout Successfully.';
 
     //Regex
+    static firstLastNameRegex = '[a-zA-Z]{4,24}';
     static nameRegex = '[a-zA-Z0-9 ]*';
 
     static emailRegex = '[A-Za-z0-9._%\\-]+@[A-Za-z0-9._%\\-]+\\.[a-z]{2,3}';
 
     static contactNumberRegex = '^[e0-9]{10,10}$';
+    static PWD_REGEX = '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$';
 
     //Variable
     static error = 'error';
@@ -20,7 +23,10 @@ export class GlobalConstants {
     static BASE_ROLE_URL = '/api/roles'
 
     static USER_LOGIN = `${this.BASE_AUTH_URL}/login`;
+    static USER_LOGOUT = `${this.BASE_AUTH_URL}/logout`;
+    static TOKEN_REFRESH = `${this.BASE_AUTH_URL}/v1/refresh`;
     static REGISTER_USER = `${this.BASE_AUTH_URL}/register-user`;
+    static VALIDATE_USER_SESSION = `${this.BASE_AUTH_URL}/check-status`;
     static GET_USER_BY_ID(userId) {
         return `${this.BASE_USER_URL}/find/${userId}`;
     }
