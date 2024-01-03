@@ -1,10 +1,10 @@
-import { useContext, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { GlobalConstants } from "../constants/global-constants";
 import { Container, Form, FormControl } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { AuthContext } from "./AuthProvider";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import useAuth from "../hooks/useAuth";
 
 const Login = () => {
   const [isValidated, setIsValidated] = useState(false);
@@ -15,7 +15,7 @@ const Login = () => {
   });
 
   const navigate = useNavigate();
-  const auth = useContext(AuthContext);
+  const auth = useAuth();
   const location = useLocation();
   const redirectUrl = location.state?.path || "/";
   const axiosPrivateHook = useAxiosPrivate();
@@ -58,6 +58,14 @@ const Login = () => {
     }, 2500);
   };
 
+  const togglePersist = () => {
+    auth.setPersist((prev) => !prev);
+  };
+
+  useEffect(() => {
+    localStorage.setItem("persist", auth.persist);
+  }, [auth.persist]);
+
   return (
     <Container className="col-6 mt-5 mb-5">
       {errorMsg && (
@@ -85,7 +93,7 @@ const Login = () => {
             Please enter valid email
           </Form.Control.Feedback>
         </div>
-        <div className="row mb-3">
+        <div className="row mb-2">
           <Form.Label htmlFor="password" className="col-sm-2 col-form-label">
             Password:
           </Form.Label>
@@ -103,6 +111,17 @@ const Login = () => {
           <Form.Control.Feedback type="invalid">
             Please enter correct password
           </Form.Control.Feedback>
+        </div>
+        <div className="row mb-3">
+          <div className="persistCheck">
+            <input
+              type="checkbox"
+              id="isPersist"
+              onChange={togglePersist}
+              checked={auth.persist}
+            />
+            <label htmlFor="isPersist">Trust This Device</label>
+          </div>
         </div>
         <div className="mb-3">
           <button

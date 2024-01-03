@@ -43,8 +43,7 @@ export class GlobalConstants {
     }
 
     //Protected Apis
-    static USER_LOGOUT = `${this.BASE_AUTH_URL} /logout`;
-    static VALIDATE_USER_SESSION = `${this.BASE_AUTH_URL}/check-status`;
+    static USER_LOGOUT = `${this.BASE_AUTH_URL}/logout`;
     static GET_ALL_BOOKING = `${this.BASE_BOOKING_URL}/all`
     static BOOK_ROOM_BY_ID(roomId) {
         return `${this.BASE_BOOKING_URL}/book-room/${roomId}`;

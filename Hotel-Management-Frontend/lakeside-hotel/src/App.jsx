@@ -20,6 +20,8 @@ import RequireAuth from "./components/auth/RequiredAuth";
 import PageNotFound from "./components/common/PageNotFound";
 import Layout from "./components/layouts/Layout";
 import { Route, Routes } from "react-router";
+import PersistLogin from "./components/auth/PersistLogin";
+import Unauthorized from "./components/auth/Unauthorized";
 
 function App() {
   const [appModeDarkOrLight, setAppMode] = useState("light");
@@ -45,29 +47,32 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           {/* Public Routes */}
-          <Route path="/" element={<Home />}></Route>
-          <Route path="/add-room" element={<AddRoom />}></Route>
-          <Route path="/edit-room/:roomId" element={<EditRoom />}></Route>
-          <Route path="/existing-rooms" element={<ExistingRooms />}></Route>
-          <Route path="/manage-bookings" element={<Bookings />}></Route>
-          <Route path="/browse-all-rooms" element={<RoomListing />}></Route>
-          <Route path="/booking-success" element={<BookingSuccess />}></Route>
-          <Route path="/login" element={<Login />}></Route>
-          <Route path="/register" element={<Registration />}></Route>
-          <Route path="/profile" element={<Profile />}></Route>
-          <Route path="/logout" element={<Logout />}></Route>
+          <Route element={<PersistLogin />}>
+            <Route path="/" element={<Home />}></Route>
+            <Route path="/add-room" element={<AddRoom />}></Route>
+            <Route path="/edit-room/:roomId" element={<EditRoom />}></Route>
+            <Route path="/existing-rooms" element={<ExistingRooms />}></Route>
+            <Route path="/manage-bookings" element={<Bookings />}></Route>
+            <Route path="/browse-all-rooms" element={<RoomListing />}></Route>
+            <Route path="/booking-success" element={<BookingSuccess />}></Route>
+            <Route path="/login" element={<Login />}></Route>
+            <Route path="/register" element={<Registration />}></Route>
+            <Route path="/profile" element={<Profile />}></Route>
+            <Route path="/logout" element={<Logout />}></Route>
+            <Route path="/unauthorized" element={<Unauthorized />} />
 
-          {/* Protected Routes */}
-          <Route element={<RequireAuth />}>
-            <Route path="/find-booking" element={<FindRoomBooking />}></Route>
-            <Route path="/book-room/:roomId" element={<Checkout />}></Route>
+            {/* Protected Routes */}
+            <Route element={<RequireAuth allowedRoles={["ROLE_USER"]} />}>
+              <Route path="/find-booking" element={<FindRoomBooking />}></Route>
+              <Route path="/book-room/:roomId" element={<Checkout />}></Route>
+            </Route>
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={<Admin />}></Route>
+
+            {/* Mising Routes */}
+            <Route path="*" element={<PageNotFound />}></Route>
           </Route>
-
-          {/* Admin Routes */}
-          <Route path="/admin" element={<Admin />}></Route>
-
-          {/* Mising Routes */}
-          <Route path="*" element={<PageNotFound />}></Route>
         </Route>
       </Routes>
       {/* </Router> */}

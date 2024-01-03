@@ -5,10 +5,15 @@ export const AuthContext = createContext({
   authUserDetails: {},
   handleLogin: () => {},
   handleLogout: () => {},
+  persist: false,
+  setPersist: false,
 });
 
 export const AuthProvider = (props) => {
   const [authUserDetails, setAuthUserDetails] = useState({});
+  const [persist, setPersist] = useState(
+    JSON.parse(localStorage.getItem("persist")) || false
+  );
 
   const handleLogin = (user) => {
     setAuthUserDetails(user);
@@ -28,6 +33,8 @@ export const AuthProvider = (props) => {
         authUserDetails,
         handleLogin,
         handleLogout,
+        persist,
+        setPersist,
       }}
     >
       {props.children}

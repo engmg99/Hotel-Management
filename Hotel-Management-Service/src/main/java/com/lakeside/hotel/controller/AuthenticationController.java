@@ -127,19 +127,17 @@ public class AuthenticationController {
 			HttpHeaders responseHeaders = new HttpHeaders();
 			String decryptedAccessToken = null;
 			String decryptedRefreshToken = null;
-			if (accessToken != null) {
+			LoginResponse loginResponse = null;
+			if (accessToken != null && refreshToken != null) {
 				decryptedAccessToken = SecurityCipher.decrypt(accessToken);
-			}
-			if (refreshToken != null) {
 				decryptedRefreshToken = SecurityCipher.decrypt(refreshToken);
-
-			}
-			Map<String, Object> result = hotelUserService.refreshToken(decryptedAccessToken, decryptedRefreshToken);
-			LoginResponse loginResponse = (result != null && result.containsKey("loginResponse"))
-					? (LoginResponse) result.get("loginResponse")
-					: null;
-			if (result != null && result.containsKey("httpHeaders")) {
-				responseHeaders = (HttpHeaders) result.get("httpHeaders");
+				Map<String, Object> result = hotelUserService.refreshToken(decryptedAccessToken, decryptedRefreshToken);
+				loginResponse = (result != null && result.containsKey("loginResponse"))
+						? (LoginResponse) result.get("loginResponse")
+						: null;
+				if (result != null && result.containsKey("httpHeaders")) {
+					responseHeaders = (HttpHeaders) result.get("httpHeaders");
+				}
 			}
 			return ResponseEntity.ok().headers(responseHeaders).body(loginResponse);
 		} catch (Exception e) {
@@ -157,10 +155,5 @@ public class AuthenticationController {
 			logger.error("Logout Exception :: ", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
 		}
-	}
-
-	@GetMapping("/check-status")
-	public void checkStatus() {
-		logger.info("Validating User Session");
 	}
 }

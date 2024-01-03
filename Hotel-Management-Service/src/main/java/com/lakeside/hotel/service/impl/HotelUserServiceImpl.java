@@ -1,5 +1,6 @@
 package com.lakeside.hotel.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -114,23 +115,40 @@ public class HotelUserServiceImpl implements HotelUserService {
 
 	@Override
 	public Map<String, Object> refreshToken(String accessToken, String refreshToken) {
+		String username = null;
+		Long userId = null;
+		List<String> userRoles = new ArrayList<>();
 		Map<String, Object> mapToReturn = new HashMap<>();
-		Map<String, String> jwtTokenMap = jwtUtils.validateToken(refreshToken);
-		if (!Boolean.parseBoolean(jwtTokenMap.get("validated"))) {
-			LoginResponse loginResponse = new LoginResponse(LoginResponse.SuccessFailure.FAILURE,
-					"Invalid Refresh Token");
-			mapToReturn.put("loginResponse", loginResponse);
-			return mapToReturn;
+		Map<String, String> accessTokenMap = jwtUtils.validateToken(accessToken);
+		if (!Boolean.parseBoolean(accessTokenMap.get("validated"))) {
+			Map<String, String> jwtTokenMap = jwtUtils.validateToken(refreshToken);
+			if (!Boolean.parseBoolean(jwtTokenMap.get("validated"))) {
+				LoginResponse loginResponse = new LoginResponse(LoginResponse.SuccessFailure.FAILURE,
+						"Invalid Refresh Token");
+				mapToReturn.put("loginResponse", loginResponse);
+				return mapToReturn;
+			}
+			username = jwtUtils.getUserNameFromToken(refreshToken);
+			HotelUser user = getUser(username);
+			userId = user.getId();
+			for (Role role : user.getRoles()) {
+				userRoles.add(role.getRole());
+			}
+			UserToken newAccessToken = jwtUtils.generateAccessToken(user);
+			HttpHeaders responseHeaders = new HttpHeaders();
+			responseHeaders.add(HttpHeaders.SET_COOKIE, cookieUtils
+					.createAccessTokenCookie(newAccessToken.getTokenValue(), newAccessToken.getDuration()).toString());
+			mapToReturn.put("httpHeaders", responseHeaders);
+		} else {
+			username = jwtUtils.getUserNameFromToken(accessToken);
+			HotelUser user = getUser(username);
+			userId = user.getId();
+			for (Role role : user.getRoles()) {
+				userRoles.add(role.getRole());
+			}
 		}
-		String username = jwtUtils.getUserNameFromToken(refreshToken);
-		HotelUser user = getUser(username);
-		UserToken newAccessToken = jwtUtils.generateAccessToken(user);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.add(HttpHeaders.SET_COOKIE, cookieUtils
-				.createAccessTokenCookie(newAccessToken.getTokenValue(), newAccessToken.getDuration()).toString());
-		mapToReturn.put("httpHeaders", responseHeaders);
 		LoginResponse loginResponse = new LoginResponse(LoginResponse.SuccessFailure.SUCCESS,
-				"Auth successful. Tokens are created in cookie.");
+				"Auth successful. Tokens are created in cookie.", userId, username, userRoles);
 		mapToReturn.put("loginResponse", loginResponse);
 		return mapToReturn;
 	}
