@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-import { axiosDelete, axiosGet } from "../utils/APIFunctions";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { GlobalConstants } from "../constants/global-constants";
 
 const Profile = () => {
@@ -26,33 +26,35 @@ const Profile = () => {
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+  const axiosPrivateHook = useAxiosPrivate();
 
   const userId = localStorage.getItem("userId");
   console.log("userId", userId);
+
   const fetchUser = useCallback(async () => {
     try {
-      const userData = await axiosGet(
+      const userData = await axiosPrivateHook.get(
         GlobalConstants.GET_USER_BY_ID(userId),
         true
       );
-      setUser(userData);
-      console.log("userData", userData);
+      setUser(userData?.data);
+      console.log("userData", userData?.data);
     } catch (error) {
       console.error(error);
-      setErrorMessage(error.message);
+      setErrorMessage(error?.response?.data);
     }
   }, [userId]);
 
   const fetchBookings = useCallback(async () => {
     try {
-      const response = await axiosGet(
+      const response = await axiosPrivateHook.get(
         GlobalConstants.GET_ALL_BOOKING_DONE_BY_USER(userId),
         true
       );
-      setBookings(response);
+      setBookings(response?.data);
     } catch (error) {
       console.error("Error fetching bookings:", error.message);
-      setErrorMessage(error.message);
+      setErrorMessage(error?.response?.data);
     }
   }, [userId]);
 
@@ -95,13 +97,13 @@ const Profile = () => {
     );
     if (confirmed) {
       try {
-        const result = await axiosDelete(
+        const result = await axiosPrivateHook.delete(
           GlobalConstants.DELETE_USER_BY_ID(userId),
           true
         );
-        if (result) {
-          console.log(result);
-          setMessage(result);
+        if (result?.data) {
+          console.log(result?.data);
+          setMessage(result?.data);
           localStorage.removeItem("token");
           localStorage.removeItem("userId");
           localStorage.removeItem("userRole");
@@ -109,7 +111,7 @@ const Profile = () => {
           window.location.reload();
         }
       } catch (error) {
-        setErrorMessage(error?.message);
+        setErrorMessage(error?.response?.data);
       }
     }
   };

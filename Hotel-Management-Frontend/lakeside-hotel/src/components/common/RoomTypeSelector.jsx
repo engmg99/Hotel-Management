@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { axiosGet } from "../utils/APIFunctions";
 import PropTypes from "prop-types";
 import { GlobalConstants } from "../constants/global-constants";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 // as this component is called from AddRoom with some data so we'll handle that by adding props in function
 const RoomTypeSelector = (props) => {
@@ -10,14 +10,15 @@ const RoomTypeSelector = (props) => {
   const [showNewRoomTypeInput, setShowNewRoomTypeInput] = useState(false);
   const [newRoomType, setNewRoomType] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const axiosPrivateHook = useAxiosPrivate();
 
   //get all the roomTypes from backend API
   //this method run only on first render as empty array is passed
   useEffect(() => {
     //axios get method which get all existing room types and set it in the state variable
     // Get all the room types from DB
-    axiosGet(GlobalConstants.GET_ALL_ROOM_TYPES).then((data) => {
-      setRoomTypes(data);
+    axiosPrivateHook.get(GlobalConstants.GET_ALL_ROOM_TYPES).then((res) => {
+      setRoomTypes(res?.data);
     });
   }, []);
 

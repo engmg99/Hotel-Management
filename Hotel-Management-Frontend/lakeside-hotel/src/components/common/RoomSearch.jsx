@@ -1,6 +1,5 @@
 import moment from "moment";
 import React, { useState } from "react";
-import { axiosGet } from "../utils/APIFunctions";
 import { GlobalConstants } from "../constants/global-constants";
 import {
   Button,
@@ -13,6 +12,7 @@ import {
 } from "react-bootstrap";
 import RoomTypeSelector from "./RoomTypeSelector";
 import RoomSearchResults from "./RoomSearchResults";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const RoomSearch = () => {
   const resetSearchQuery = {
@@ -24,6 +24,7 @@ const RoomSearch = () => {
   const [availableRooms, setAvailableRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const axiosPrivateHook = useAxiosPrivate();
 
   const handleSearch = async (e) => {
     e.preventDefault;
@@ -44,19 +45,19 @@ const RoomSearch = () => {
     }
     setIsLoading(true);
     try {
-      const result = await axiosGet(
+      const result = await axiosPrivateHook.get(
         GlobalConstants.GET_ALL_AVAILABLE_ROOMS_BY_DATE(
           searchQuery.checkInDate,
           searchQuery.checkOutDate,
           searchQuery.roomType
         )
       );
-      setAvailableRooms(result);
+      setAvailableRooms(result?.data);
       setErrorMsg("");
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      setErrorMsg(error?.message);
+      setErrorMsg(error?.response?.data);
     }
   };
 

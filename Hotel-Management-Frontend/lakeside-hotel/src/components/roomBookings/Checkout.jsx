@@ -1,7 +1,6 @@
 import { useParams } from "react-router";
 import BookingForm from "./BookingForm";
 import { useEffect, useState } from "react";
-import { axiosGet } from "../utils/APIFunctions";
 import { GlobalConstants } from "../constants/global-constants";
 import { Col, Row, Container } from "react-bootstrap";
 import {
@@ -14,6 +13,7 @@ import {
   FaWifi,
 } from "react-icons/fa";
 import RoomCarousel from "../hotelRoom/RoomCarousel";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const Checkout = () => {
   const [existingRoom, setExistingRoom] = useState({
@@ -24,12 +24,15 @@ const Checkout = () => {
 
   // route params
   const { roomId } = useParams(); // gets the current room id which user wants to book
+  const axiosPrivateHook = useAxiosPrivate();
 
   // method gets the current roomId info
   const getRoomPriceById = async (roomId) => {
     try {
-      const response = await axiosGet(GlobalConstants.GET_ROOM_BY_ID(roomId));
-      setExistingRoom(response);
+      const response = await axiosPrivateHook.get(
+        GlobalConstants.GET_ROOM_BY_ID(roomId)
+      );
+      setExistingRoom(response?.data);
     } catch (error) {
       throw new Error(error);
     }

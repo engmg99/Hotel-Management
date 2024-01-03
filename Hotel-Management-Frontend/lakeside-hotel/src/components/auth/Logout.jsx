@@ -1,18 +1,21 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { axiosGet } from "../utils/APIFunctions";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { GlobalConstants } from "../constants/global-constants";
 
 const Logout = () => {
   const auth = useAuth();
   const navigate = useNavigate();
+  const axiosPrivateHook = useAxiosPrivate();
 
   const handleLogout = async () => {
     try {
-      const logoutUser = await axiosGet(GlobalConstants.USER_LOGOUT);
-      if (logoutUser.message === GlobalConstants.userLogoutMsg) {
-        console.log(logoutUser);
+      const logoutUser = await axiosPrivateHook.get(
+        GlobalConstants.USER_LOGOUT
+      );
+      if (logoutUser?.data?.message === GlobalConstants.userLogoutMsg) {
+        console.log(logoutUser?.data);
         auth.handleLogout();
         navigate("/", { state: { message: GlobalConstants.userLogoutMsg } });
       }

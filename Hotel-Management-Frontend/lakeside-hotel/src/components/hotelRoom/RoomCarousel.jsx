@@ -1,26 +1,27 @@
 import { useEffect, useState } from "react";
-import { axiosGet } from "../utils/APIFunctions";
 import { GlobalConstants } from "../constants/global-constants";
 import { Card, Carousel, Col, Container, Row, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const RoomCarousel = () => {
   const [rooms, setRooms] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const axiosPrivateHook = useAxiosPrivate();
 
   const fetchAllRooms = async () => {
     setIsLoading(true);
     try {
-      const rooms = await axiosGet(GlobalConstants.GET_ALL_ROOMS);
-      if (rooms) {
-        setRooms(rooms);
+      const rooms = await axiosPrivateHook.get(GlobalConstants.GET_ALL_ROOMS);
+      if (rooms?.data) {
+        setRooms(rooms?.data);
       }
       setErrorMsg("");
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      setErrorMsg(error?.message);
+      setErrorMsg(error?.response?.data);
     }
   };
 

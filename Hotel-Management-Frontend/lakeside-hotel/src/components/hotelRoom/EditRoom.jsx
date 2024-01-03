@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
-import { axiosGet, updateRoom } from "../utils/APIFunctions";
 import { Link } from "react-router-dom";
 import { FaBackward } from "react-icons/fa";
 import RoomTypeSelector from "../common/RoomTypeSelector";
 import { GlobalConstants } from "../constants/global-constants";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const EditRoom = () => {
   //state variable
@@ -21,6 +21,7 @@ const EditRoom = () => {
 
   // fileInput ref variable used to store a selected Img name as value and it doesn't cause a re-render
   const fileInput = useRef(null);
+  const axiosPrivateHook = useAxiosPrivate();
 
   // as we're are navigating to this page from ExistingRoom so roomId as request param is passed and we'll receive it here using useParams()
   const { roomId } = useParams();
@@ -33,9 +34,11 @@ const EditRoom = () => {
   //get the room data by Id
   const fetchRooms = async (roomId) => {
     try {
-      const roomData = await axiosGet(GlobalConstants.GET_ROOM_BY_ID(roomId));
-      setRoom(roomData);
-      setImgPreview("data:image/png;base64," + roomData.roomPhoto);
+      const roomData = await axiosPrivateHook.get(
+        GlobalConstants.GET_ROOM_BY_ID(roomId)
+      );
+      setRoom(roomData?.data);
+      setImgPreview("data:image/png;base64," + roomData?.data?.roomPhoto);
       //**IMP** here we'll receive the base64Encoded img, so to display it we have appended it with some base config "data:image/png;base64,"
     } catch (error) {
       console.error(error);
@@ -60,18 +63,35 @@ const EditRoom = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await updateRoom(roomId, room); // calling updateRoom api from axios
+      // by using this we can get the Data in backend by @RequestBody Attribute
+      // const data = {
+      //     roomType: roomData.roomType,
+      //     price: roomData.roomPrice
+      // }
+      // by this we'll accept it using @RequestParam
+      const formData = new FormData();
+      formData.append("photo", room.roomPhoto);
+      formData.append("roomType", room.roomType);
+      formData.append("roomPrice", room.price);
+      const response = await axiosPrivateHook.post(
+        GlobalConstants.EDIT_ROOM_BY_ID(roomId),
+        formData
+      ); // calling updateRoom api from axios
       if (response.status === 200) {
         setSuccessMsg("Room Updated Successfully");
-        const updatedRoomData = await axiosGet(GlobalConstants.GET_ROOM_BY_ID(roomId)); // if success get the lastest data of that room
-        setRoom(updatedRoomData);
-        setImgPreview("data:image/png;base64," + updatedRoomData.roomPhoto); // received img is of type base64encoded hence appended
+        const updatedRoomData = await axiosPrivateHook.get(
+          GlobalConstants.GET_ROOM_BY_ID(roomId)
+        ); // if success get the lastest data of that room
+        setRoom(updatedRoomData?.data);
+        setImgPreview(
+          "data:image/png;base64," + updatedRoomData?.data?.roomPhoto
+        ); // received img is of type base64encoded hence appended
         setErrorMsg("");
       } else {
         setErrorMsg("Error updating room");
       }
     } catch (error) {
-      setErrorMsg(error.message);
+      setErrorMsg(error?.response?.data);
     }
     setTimeout(() => {
       setSuccessMsg("");

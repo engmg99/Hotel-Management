@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { axiosPost } from "../utils/APIFunctions";
 import { useNavigate } from "react-router";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import moment from "moment/moment";
 import {
   Button,
@@ -36,6 +36,8 @@ const BookingForm = (props) => {
 
   // navigation
   const navigate = useNavigate(); // used to navigate to a particular URL after performing some logic
+
+  const axiosPrivateHook = useAxiosPrivate();
 
   // method used to handle the form inputs
   const handleInputChange = (e) => {
@@ -111,12 +113,12 @@ const BookingForm = (props) => {
   // submit room reservation
   const handleBooking = async () => {
     try {
-      const confirmCode = await axiosPost(
+      const confirmCode = await axiosPrivateHook.post(
         GlobalConstants.BOOK_ROOM_BY_ID(props.roomId),
         bookingInfo
       );
       setIsSubmitted(true);
-      navigate("/booking-success", { state: { message: confirmCode } });
+      navigate("/booking-success", { state: { message: confirmCode?.data } });
     } catch (error) {
       setErrorMsg(error?.response?.data);
       navigate("/booking-success", { state: { error: error?.response?.data } });

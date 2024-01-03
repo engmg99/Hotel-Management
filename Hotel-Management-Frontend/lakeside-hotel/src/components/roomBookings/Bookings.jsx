@@ -2,22 +2,25 @@
 import { Container } from "react-bootstrap";
 import Header from "../common/Header";
 import BookingTable from "./BookingTable";
-import { axiosDelete, axiosGet } from "../utils/APIFunctions";
 import { GlobalConstants } from "../constants/global-constants";
 import { useEffect, useState } from "react";
 import Spinner from "../layouts/Spinner";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const Bookings = () => {
   const [roomBookings, setRoomBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const axiosPrivateHook = useAxiosPrivate();
 
   const getAllRoomBookings = async () => {
     setIsLoading(true);
     try {
-      const result = await axiosGet(GlobalConstants.GET_ALL_BOOKING);
-      console.log(result);
-      setRoomBookings(result);
+      const result = await axiosPrivateHook.get(
+        GlobalConstants.GET_ALL_BOOKING
+      );
+      console.log(result?.data);
+      setRoomBookings(result?.data);
       setIsLoading(false);
     } catch (error) {
       console.log(error);
@@ -33,12 +36,16 @@ const Bookings = () => {
   const cancelRoomBooking = async (bookingId) => {
     setIsLoading(true);
     try {
-      await axiosDelete(GlobalConstants.CANCEL_ROOM_BOOKING_BY_ID(bookingId));
-      const roomBookingList = await axiosGet(GlobalConstants.GET_ALL_BOOKING);
-      setRoomBookings(roomBookingList);
+      await axiosPrivateHook.delete(
+        GlobalConstants.CANCEL_ROOM_BOOKING_BY_ID(bookingId)
+      );
+      const roomBookingList = await axiosPrivateHook.get(
+        GlobalConstants.GET_ALL_BOOKING
+      );
+      setRoomBookings(roomBookingList?.data);
       setIsLoading(false);
     } catch (error) {
-      setErrorMsg(error?.message);
+      setErrorMsg(error?.response?.data);
       setIsLoading(false);
     }
   };

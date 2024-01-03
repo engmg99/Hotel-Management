@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { axiosDelete, axiosGet } from "../utils/APIFunctions";
 import { Col, Row } from "react-bootstrap";
 import RoomFilter from "../common/RoomFilter";
 import RoomPaginator from "../common/RoomPaginator";
@@ -8,6 +7,7 @@ import { Link } from "react-router-dom";
 import Spinner from "../layouts/Spinner";
 import { GlobalConstants } from "../constants/global-constants";
 import axios from "axios";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const ExistingRooms = () => {
   //state variables
@@ -28,19 +28,20 @@ const ExistingRooms = () => {
 
   const CancelToken = axios.CancelToken;
   const source = CancelToken.source();
+  const axiosPrivateHook = useAxiosPrivate();
 
   // method used to get all rooms from axios request
   const fetchRooms = useCallback(async () => {
     setIsLoading(true);
     try {
-      const result = await axiosGet(GlobalConstants.GET_ALL_ROOMS, {
+      const result = await axiosPrivateHook.get(GlobalConstants.GET_ALL_ROOMS, {
         cancelToken: source.token,
       }); // get all existing rooms
-      setRooms(result);
+      setRooms(result?.data);
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      setErrorMsg(error.message);
+      setErrorMsg(error?.response?.data);
     }
   }, []);
 
@@ -76,17 +77,17 @@ const ExistingRooms = () => {
   //delete the room by id
   const handleDelete = async (roomId) => {
     try {
-      const result = await axiosDelete(
+      const result = await axiosPrivateHook.delete(
         GlobalConstants.DELETE_ROOM_BY_ID(roomId)
       ); // calling delete API from axios
-      if (result === "") {
+      if (result?.data === "") {
         setSuccessMsg(`Room No ${roomId} was deleted.`);
         fetchRooms();
       } else {
-        console.error(`Error Deleting Room: ${result.message}`);
+        console.error(`Error Deleting Room: ${result?.data?.message}`);
       }
     } catch (error) {
-      setErrorMsg("Error: ", error);
+      setErrorMsg("Error: ", error?.response?.data);
     }
     setTimeout(() => {
       setSuccessMsg("");

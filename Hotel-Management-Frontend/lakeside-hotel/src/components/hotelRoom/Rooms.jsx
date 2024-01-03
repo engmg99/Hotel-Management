@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import RoomCard from "./RoomCard";
-import { axiosGet } from "../utils/APIFunctions";
 import Spinner from "../layouts/Spinner";
 import { Col, Row } from "react-bootstrap";
 import RoomFilter from "../common/RoomFilter";
 import RoomPaginator from "../common/RoomPaginator";
 import { GlobalConstants } from "../constants/global-constants";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 const Rooms = () => {
   // store all rooms as an array
   const [rooms, setRooms] = useState([]);
@@ -21,17 +21,18 @@ const Rooms = () => {
   // store the success and error msg
   const [successMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const axiosPrivateHook = useAxiosPrivate();
 
   const fetchRooms = async () => {
     setIsLoading(true);
     try {
-      const result = await axiosGet(GlobalConstants.GET_ALL_ROOMS); // get all existing rooms
+      const result = await axiosPrivateHook.get(GlobalConstants.GET_ALL_ROOMS); // get all existing rooms
       setIsLoading(false);
-      setRooms(result);
-      setFilteredRooms(result);
+      setRooms(result?.data);
+      setFilteredRooms(result?.data);
     } catch (error) {
       setIsLoading(false);
-      setErrorMsg(error.message);
+      setErrorMsg(error?.response?.data);
     }
   };
 

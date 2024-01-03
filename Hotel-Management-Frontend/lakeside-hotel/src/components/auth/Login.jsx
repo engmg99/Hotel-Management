@@ -1,10 +1,10 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { axiosPost } from "../utils/APIFunctions";
 import { GlobalConstants } from "../constants/global-constants";
 import { Container, Form, FormControl } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { AuthContext } from "./AuthProvider";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const Login = () => {
   const [isValidated, setIsValidated] = useState(false);
@@ -18,19 +18,7 @@ const Login = () => {
   const auth = useContext(AuthContext);
   const location = useLocation();
   const redirectUrl = location.state?.path || "/";
-
-  useEffect(() => {
-    console.log("Login User Session", auth.authUserDetails);
-    if (auth.authUserDetails?.status === "Invalid Token") {
-      // setErrorMessage("JWT Token Expired");
-      // auth.refreshToken();
-    } else if (auth.authUserDetails?.status === "Token Not Present") {
-      setErrorMessage("Invalid Session. Log In Again.");
-    }
-    return () => {
-      setErrorMessage("");
-    };
-  }, [auth]);
+  const axiosPrivateHook = useAxiosPrivate();
 
   const handleInputChange = (e) => {
     setLogin({ ...login, [e.target.name]: e.target.value });
@@ -50,11 +38,14 @@ const Login = () => {
     // console.log(e.currentTarget.checkValidity());
     if (validateLoginForm(e)) {
       try {
-        const loginResult = await axiosPost(GlobalConstants.USER_LOGIN, login);
-        if (loginResult) {
+        const loginResult = await axiosPrivateHook.post(
+          GlobalConstants.USER_LOGIN,
+          login
+        );
+        if (loginResult?.data) {
           setErrorMessage("");
-          console.log("loginResult: ", loginResult);
-          auth.handleLogin(loginResult);
+          console.log("loginResult: ", loginResult?.data);
+          auth.handleLogin(loginResult?.data);
           navigate(redirectUrl, { replace: true });
         }
       } catch (error) {

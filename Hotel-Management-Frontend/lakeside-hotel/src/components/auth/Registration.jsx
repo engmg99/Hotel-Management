@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { axiosPost } from "../utils/APIFunctions";
+import { Link, useNavigate } from "react-router-dom";
 import { GlobalConstants } from "../constants/global-constants";
 import { Container, Form, FormControl } from "react-bootstrap";
 import { FaInfoCircle } from "react-icons/fa";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const Registration = () => {
   const [isValidated, setIsValidated] = useState(false);
@@ -17,6 +17,8 @@ const Registration = () => {
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
+  const axiosPrivateHook = useAxiosPrivate();
 
   // useEffect(() => {
   //   userRef.current.focus();
@@ -59,11 +61,11 @@ const Registration = () => {
     e.preventDefault();
     if (validateRegistrationForm(e)) {
       try {
-        const result = await axiosPost(
+        const result = await axiosPrivateHook.post(
           GlobalConstants.REGISTER_USER,
           registration
         );
-        setSuccessMessage(result);
+        setSuccessMessage(result?.data);
         setErrorMessage("");
         setRegistration({
           firstName: "",
@@ -71,9 +73,10 @@ const Registration = () => {
           email: "",
           password: "",
         });
+        navigate("/");
       } catch (error) {
         setSuccessMessage("");
-        setErrorMessage(`Registration error : ${error.message}`);
+        setErrorMessage(`Registration error : ${error?.response?.data}`);
       }
     }
     setTimeout(() => {
@@ -111,7 +114,7 @@ const Registration = () => {
             <Form.Control.Feedback type="invalid">
               <p className="instructions">
                 <FaInfoCircle />
-                4 to 24 characters.
+                3 to 24 characters.
                 <br />
                 Only Letters are allowed.
               </p>

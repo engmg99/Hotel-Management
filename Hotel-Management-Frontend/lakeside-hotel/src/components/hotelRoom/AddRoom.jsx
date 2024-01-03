@@ -1,8 +1,9 @@
 import React, { useRef, useState } from "react";
-import { addNewRoom } from "../utils/APIFunctions";
 import RoomTypeSelector from "../common/RoomTypeSelector";
 import { Link } from "react-router-dom";
 import { FaBackward } from "react-icons/fa";
+import { GlobalConstants } from "../constants/global-constants";
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const AddRoom = () => {
   // newRoom state variable to store new room data
@@ -23,6 +24,7 @@ const AddRoom = () => {
 
   // fileInput ref variable used to store a value and it doesn't cause a re-render
   const fileInput = useRef(null);
+  const axiosPrivateHook = useAxiosPrivate();
 
   // method to handle room data values
   const handleRoomInputChange = (e) => {
@@ -48,15 +50,22 @@ const AddRoom = () => {
     // if this is not added then after clicking submit button the form will refresh automatically i.e. defaultBehaviour
     e.preventDefault();
     try {
-      const success = await addNewRoom(newRoom); //calling axios method created in APIFunction file
-      if (success !== undefined) {
+      const formData = new FormData(); // form Data which we will handle at Backend by @RequestParams
+      formData.append("photo", newRoom.roomPhoto);
+      formData.append("roomType", newRoom.roomType);
+      formData.append("roomPrice", newRoom.price);
+      const success = await axiosPrivateHook.post(
+        GlobalConstants.ADD_NEW_ROOM,
+        formData
+      ); //calling axios method created in APIFunction file
+      if (success?.data !== undefined) {
         setSuccessMsg("New Room Added Successfully");
         resetForm();
       } else {
         setErrorMsg("Error while adding room");
       }
     } catch (error) {
-      setErrorMsg(error.message);
+      setErrorMsg(error?.response?.data);
     }
     // this below timeOut will hide the Success and Error Popups in 3sec
     setTimeout(() => {

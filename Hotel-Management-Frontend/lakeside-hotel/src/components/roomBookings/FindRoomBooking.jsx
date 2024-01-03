@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { Container } from "react-bootstrap";
 import Spinner from "../layouts/Spinner";
-import { axiosDelete, axiosGet } from "../utils/APIFunctions";
 import { GlobalConstants } from "../constants/global-constants";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css"; // Import css
+import useAxiosPrivate from "../hooks/useAxiosPrivate";
 
 const FindRoomBooking = () => {
-  console.log("s");
   const [confirmationCode, setConfirmationCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
@@ -40,6 +39,8 @@ const FindRoomBooking = () => {
     totalGuests: 0,
   };
 
+  const axiosPrivateHook = useAxiosPrivate();
+
   const handleInputChange = (e) => {
     setConfirmationCode(e.target.value);
   };
@@ -53,13 +54,13 @@ const FindRoomBooking = () => {
     }
     setIsLoading(true);
     try {
-      const roomInfo = await axiosGet(
+      const roomInfo = await axiosPrivateHook.get(
         GlobalConstants.GET_ROOM_BOOKING_BY_CODE(confirmationCode)
       );
       resetStates();
-      if (roomInfo) {
-        console.log(roomInfo);
-        setBookingInfo(roomInfo);
+      if (roomInfo?.data) {
+        console.log(roomInfo?.data);
+        setBookingInfo(roomInfo?.data);
         setIsDeleted(false);
       } else {
         setErrorMsg("No Bookings found for this code");
@@ -69,19 +70,21 @@ const FindRoomBooking = () => {
       setIsLoading(false);
       setBookingInfo(clearBookingInfo);
       console.log(error);
-      setErrorMsg(error?.message);
+      setErrorMsg(error?.response?.data);
     }
   };
 
   const cancelRoomBooking = async (bookingId) => {
     setIsLoading(true);
     try {
-      await axiosDelete(GlobalConstants.CANCEL_ROOM_BOOKING_BY_ID(bookingId));
+      await axiosPrivateHook.delete(
+        GlobalConstants.CANCEL_ROOM_BOOKING_BY_ID(bookingId)
+      );
       setIsDeleted(true);
       setBookingInfo(clearBookingInfo);
       resetStates();
     } catch (error) {
-      setErrorMsg(error?.message);
+      setErrorMsg(error?.response?.data);
       setIsLoading(false);
     }
   };
